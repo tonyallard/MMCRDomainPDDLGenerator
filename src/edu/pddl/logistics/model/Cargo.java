@@ -7,11 +7,13 @@ public class Cargo {
 	private String name = "";
 	private int size = 0;
 	private Location initialLocation = null;
+	private int availableIn = 0;
 
-	public Cargo(String name, int size) {
+	public Cargo(String name, int size, int availableIn) {
 		super();
 		this.name = name;
 		this.size = size;
+		this.availableIn = availableIn;
 		numCargo++;
 	}
 
@@ -43,4 +45,11 @@ public class Cargo {
 		return initialLocation;
 	}
 
+	public int getAvailableIn() {
+		return availableIn;
+	}
+
+	public void setAvailableIn(int availableIn) {
+		this.availableIn = availableIn;
+	}
 }

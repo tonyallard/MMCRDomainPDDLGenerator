@@ -28,6 +28,7 @@ public class TransportLocationTableCellRenderer extends DefaultTableCellRenderer
 		if (row + 1 == column) {
 			c.setBackground(Color.GRAY);
 		}
+		c.setForeground(Color.BLACK);
         return c;
 	}
 

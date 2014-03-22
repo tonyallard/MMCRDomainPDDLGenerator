@@ -1,13 +1,16 @@
 package edu.pddl.logistics.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.IdentityHashMap;
+import java.util.Map;
 import java.util.Vector;
 
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -16,8 +19,12 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellEditor;
+import javax.swing.text.JTextComponent;
+
+import edu.pddl.logistics.controller.Constants;
+import edu.pddl.logistics.controller.Controller;
 import edu.pddl.logistics.model.Location;
-import edu.pddl.logistics.util.PDDLWriterConstants;
 
 public class LocationInformationPanel extends JPanel implements ActionListener,
 		TableModelListener {
@@ -27,31 +34,26 @@ public class LocationInformationPanel extends JPanel implements ActionListener,
 	 */
 	private static final long serialVersionUID = 8878364677692218340L;
 
-	private Vector<Location> locations = null;
+	private Controller controller = null;
 
 	private DefaultTableModel locationTableModel = null;
 	private JTable locationTable = null;
 	private JButton addLocation = null;
+	private JButton removeLocation = null;
 
-	private List<ActionListener> listeners = null;
+	private Map<Location, Integer> locationToRowMap = null;
 
-	public LocationInformationPanel(Vector<Location> locations) {
-		this.locations = locations;
-		this.listeners = new ArrayList<ActionListener>();
+	public LocationInformationPanel(Controller controller) {
+		this.controller = controller;
+		this.controller.addActionListener(this);
+		this.locationToRowMap = new IdentityHashMap<Location, Integer>();
 		setLayout(new BorderLayout());
 		initLocationPanel();
 	}
 
-	public void addActionListener(ActionListener listener) {
-		listeners.add(listener);
-	}
-
-	public void removeActionListener(ActionListener listener) {
-		listeners.remove(listener);
-	}
-
 	private void initLocationPanel() {
-		Object[] columnNames = { "Name", "Capacity", "Initial Inventoy" };
+		Object[] columnNames = { "Name", "Remaining Capacity",
+				"Current Inventoy" };
 		locationTableModel = new DefaultTableModel(columnNames, 0);
 		locationTableModel.addTableModelListener(this);
 		locationTable = new JTable(locationTableModel) {
@@ -72,51 +74,114 @@ public class LocationInformationPanel extends JPanel implements ActionListener,
 					return Integer.class;
 				}
 			}
+
+			// Select all contents of the cell without overriding cell
+			// validation
+			@Override
+			public Component prepareEditor(TableCellEditor editor, int row,
+					int column) {
+				Component c = super.prepareEditor(editor, row, column);
+				if (c instanceof JTextComponent) {
+					final JTextComponent jtc = (JTextComponent) c;
+					jtc.requestFocus();
+					SwingUtilities.invokeLater(new Runnable() {
+						public void run() {
+							jtc.selectAll();
+						}
+					});
+				}
+				return c;
+			}
 		};
-		locationTable.setRowHeight(20);
+		locationTable.setRowHeight(25);
 		locationTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		locationTable.getTableHeader().setReorderingAllowed(false);
 
 		addLocation = new JButton("Add Location");
 		addLocation.addActionListener(this);
 
+		removeLocation = new JButton("Remove Location");
+		removeLocation.addActionListener(this);
+
+		JPanel southPanel = new JPanel(new GridLayout(1, 2));
+		southPanel.add(addLocation);
+		southPanel.add(removeLocation);
+
+		JLabel locationInfoLabel = new JLabel("Location Information:");
+
+		add(locationInfoLabel, BorderLayout.NORTH);
 		add(new JScrollPane(locationTable), BorderLayout.CENTER);
-		add(addLocation, BorderLayout.NORTH);
+		add(southPanel, BorderLayout.SOUTH);
 	}
 
 	private void addLocation() {
-		Location location = new Location(
-				"L" + (Location.getNumLocations() + 1), 0, 0);
-		locations.add(location);
+		controller.addNewLocaiton();
+	}
+
+	private void addLocation(Location location) {
 		Vector<Object> rowData = new Vector<Object>();
 		rowData.add(location.getName());
-		rowData.add(location.getCapacity());
-		rowData.add(location.getInventory());
+		rowData.add(location.getRemainingCapacity());
+		rowData.add(location.getCurrentInventory());
+		locationToRowMap.put(location, locationTableModel.getRowCount());
 		locationTableModel.addRow(rowData);
-		notifyListeners(location, PDDLWriterConstants.LOCATION_ADD_MESSAGE);
 	}
 
-	private void notifyListeners(final Location location, final String operation) {
-		SwingUtilities.invokeLater(new Runnable() {
+	private void removeLocation() {
+		int row = locationTable.getSelectedRow();
+		if (row < 0) {
+			return;
+		}
+		Location location = getLocation(row);
+		if (location != null) {
+			controller.removeLocation(location);
+		}
+	}
 
-			@Override
-			public void run() {
-				ActionEvent event = new ActionEvent(location,
-						ActionEvent.ACTION_PERFORMED, operation);
-				for (ActionListener listener : listeners) {
-					listener.actionPerformed(event);
-				}
+	private void removeLocation(Location location) {
+		Integer row = locationToRowMap.remove(location);
+		if (row != null) {
+			locationTableModel.removeRow(row);
+		}
+	}
+
+	private void updateLocation(Location location) {
+		Integer row = locationToRowMap.get(location);
+		if (row != null) {
+			@SuppressWarnings("unchecked")
+			Vector<Object> rowData = (Vector<Object>) locationTableModel
+					.getDataVector().get(row);
+			rowData.setElementAt(location.getName(), 0);
+			rowData.setElementAt(location.getRemainingCapacity(), 1);
+			rowData.setElementAt(location.getCurrentInventory(), 2);
+		}
+	}
+
+	private Location getLocation(int row) {
+		for (Location location : locationToRowMap.keySet()) {
+			if (row == locationToRowMap.get(location)) {
+				return location;
 			}
-
-		});
-
+		}
+		return null;
 	}
-	
+
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		Object source = e.getSource();
 		if (source == addLocation) {
 			addLocation();
+		} else if (source == removeLocation) {
+			removeLocation();
+		} else if (source instanceof Location) {
+			Location location = (Location) source;
+			if (e.getActionCommand().equals(Constants.OPERATION_CREATE)) {
+				addLocation(location);
+			} else if (e.getActionCommand().equals(Constants.OPERATION_DELETE)) {
+				removeLocation(location);
+			} else if (e.getActionCommand().equals(Constants.OPERATION_UPDATE)) {
+				updateLocation(location);
+			}
 		}
 	}
 
@@ -125,25 +190,27 @@ public class LocationInformationPanel extends JPanel implements ActionListener,
 		if (e.getType() == TableModelEvent.UPDATE) {
 			int col = e.getColumn();
 			int row = e.getFirstRow();
-			String newValue = locationTableModel.getValueAt(row, col).toString();
-			Location location = locations.get(row);
+			Object newObj = locationTableModel.getValueAt(row, col);
+			if (newObj == null) {
+				return;
+			}
+			String newValue = newObj.toString();
+			Location location = getLocation(row);
 			switch (col) {
 			case 0:
 				if ((newValue != null) && (newValue.length() > 0)) {
-					location.setName(newValue);
-					notifyListeners(location,
-							PDDLWriterConstants.LOCATION_UPDATE_MESSAGE);
+					controller.setLocationName(location, newValue);
 				} else {
 					locationTableModel.setValueAt(location.getName(), row, col);
 				}
 				break;
 			case 1:
 				int cap = Integer.parseInt(newValue);
-				location.setCapacity(cap);
+				controller.setLocationRemainingCapacity(location, cap);
 				break;
 			case 2:
 				int inv = Integer.parseInt(newValue);
-				location.setInventory(inv);
+				controller.setLocationCurrentInventory(location, inv);
 				break;
 			}
 		}

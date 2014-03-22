@@ -1,5 +1,7 @@
 package edu.pddl.logistics;
 
+import javax.swing.UnsupportedLookAndFeelException;
+
 import edu.pddl.logistics.ui.MainGUI;
 
 public class Launcher {
@@ -7,7 +9,13 @@ public class Launcher {
 	{}
 	
 	public static void main (String [] args) {
-		MainGUI gui = new MainGUI();
-		gui.setVisible(true);
+		try {
+			MainGUI gui = new MainGUI();
+			gui.setVisible(true);
+		} catch (ClassNotFoundException | InstantiationException
+				| IllegalAccessException | UnsupportedLookAndFeelException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }

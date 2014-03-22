@@ -5,14 +5,14 @@ public class Location {
 	private static int numLocations = 0;
 
 	private String name = null;
-	private int capacity = 0;
-	private int inventory = 0;
+	private int reamainingCapacity = 0;
+	private int currentInventory = 0;
 
-	public Location(String name, int capacity, int inventory) {
+	public Location(String name, int reamainingCapacity, int currentInventory) {
 		super();
 		this.name = name;
-		this.capacity = capacity;
-		this.inventory = inventory;
+		this.reamainingCapacity = reamainingCapacity;
+		this.currentInventory = currentInventory;
 		numLocations++;
 	}
 
@@ -28,20 +28,20 @@ public class Location {
 		this.name = name;
 	}
 
-	public int getCapacity() {
-		return capacity;
+	public int getRemainingCapacity() {
+		return reamainingCapacity;
 	}
 
-	public void setCapacity(int capacity) {
-		this.capacity = capacity;
+	public void setRemainingCapacity(int capacity) {
+		this.reamainingCapacity = capacity;
 	}
 
-	public int getInventory() {
-		return inventory;
+	public int getCurrentInventory() {
+		return currentInventory;
 	}
 
-	public void setInventory(int inventory) {
-		this.inventory = inventory;
+	public void setCurrentInventory(int inventory) {
+		this.currentInventory = inventory;
 	}
 
 	/**
