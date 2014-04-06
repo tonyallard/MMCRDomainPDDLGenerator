@@ -23,8 +23,9 @@ public class PDDLWriterUtil {
 
 	public static void writeProblem(File file, String problemName,
 			List<Location> locations, List<Transport> transports,
-			List<Cargo> cargos) throws IOException, PDDLModelIncompleteException {
-		BufferedWriter bw = new BufferedWriter(new FileWriter(file));
+			List<Cargo> cargos) throws IOException,
+			PDDLModelIncompleteException {
+		BufferedWriter bw = new BufferedWriter(new FileWriter(file, false));
 		// HEADER
 		bw.write("(define (problem " + problemName + ")");
 		bw.newLine();
@@ -60,9 +61,10 @@ public class PDDLWriterUtil {
 		bw.newLine();
 		// Initial transport locations
 		for (Transport tpt : transports) {
-			if (tpt.getInitialLocation() == null){
+			if (tpt.getInitialLocation() == null) {
 				bw.close();
-				throw new PDDLModelIncompleteException("Transport " + tpt.getName() + " does not have an initial location.");
+				throw new PDDLModelIncompleteException("Transport "
+						+ tpt.getName() + " does not have an initial location.");
 			}
 			bw.write("\t\t(at " + tpt.getName() + " "
 					+ tpt.getInitialLocation().getName() + ")");
@@ -70,9 +72,11 @@ public class PDDLWriterUtil {
 		}
 		// Initial cargo locations
 		for (Cargo cargo : cargos) {
-			if (cargo.getInitialLocation() == null){
+			if (cargo.getInitialLocation() == null) {
 				bw.close();
-				throw new PDDLModelIncompleteException("Transport " + cargo.getName() + " does not have an initial location.");
+				throw new PDDLModelIncompleteException("Transport "
+						+ cargo.getName()
+						+ " does not have an initial location.");
 			}
 			bw.write("\t\t(at " + cargo.getName() + " "
 					+ cargo.getInitialLocation().getName() + ")");
@@ -142,14 +146,18 @@ public class PDDLWriterUtil {
 		}
 		// Transport Available Times
 		for (Transport tpt : transports) {
-			bw.write("\t\t(= (available-in " + tpt.getName() + ") "
-					+ tpt.getAvailableIn() + ")");
+			bw.write("\t\t(not (available " + tpt.getName() + "))");
+			bw.newLine();
+			bw.write("\t\t(at " + tpt.getAvailableIn() + " (available "
+					+ tpt.getName() + "))");
 			bw.newLine();
 		}
 		// Cargo Available Times
 		for (Cargo cargo : cargos) {
-			bw.write("\t\t(= (available-in " + cargo.getName() + ") "
-					+ cargo.getAvailableIn() + ")");
+			bw.write("\t\t(not (available " + cargo.getName() + "))");
+			bw.newLine();
+			bw.write("\t\t(at " + cargo.getAvailableIn() + " (available "
+					+ cargo.getName() + "))");
 			bw.newLine();
 		}
 		bw.write("\t)");
@@ -161,16 +169,17 @@ public class PDDLWriterUtil {
 		bw.write(")");
 		bw.close();
 	}
-	
+
 	public static void writeDomain(File file) throws IOException {
 		// Write Domin File
 		BufferedWriter bw = new BufferedWriter(new FileWriter(file));
-		//Read in Domain File
-		InputStream is = PDDLWriterUtil.class.getResourceAsStream(DOMAIN_FILENAME);
+		// Read in Domain File
+		InputStream is = PDDLWriterUtil.class
+				.getResourceAsStream(DOMAIN_FILENAME);
 		BufferedReader br = new BufferedReader(new InputStreamReader(is));
 		String line = br.readLine();
 		boolean firstLine = true;
-		while (line != null){
+		while (line != null) {
 			if (!firstLine) {
 
 				bw.newLine();

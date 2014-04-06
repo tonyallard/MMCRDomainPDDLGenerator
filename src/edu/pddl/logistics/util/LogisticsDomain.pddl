@@ -1,5 +1,5 @@
 (define (domain logistics)
-	(:requirements :typing :equality :action-costs :durative-actions)
+	(:requirements :typing :fluents :equality :action-costs :durative-actions :timed-initial-literals)
 	(:types
 		CONTAINER CARGO - object
 		TRANSPORT LOCATION - CONTAINER
@@ -8,6 +8,7 @@
 		(at ?x - (either TRANSPORT CARGO) ?y - LOCATION)
 		(in ?x - CARGO ?y - TRANSPORT)
 		(ready-loading ?x - TRANSPORT)
+		(available ?x - (either TRANSPORT CARGO))
 	)
 	(:functions
 		(remaining-capacity ?x - CONTAINER) - number
@@ -16,7 +17,6 @@
 		(size ?x - CARGO) - number
 		(load-time ?x - TRANSPORT) - number
 		(unload-time ?x - TRANSPORT) - number
-		(available-in ?x - (either TRANSPORT CARGO)) - number
 		(total-cost) - number
 	)
 	(:durative-action load
@@ -27,8 +27,8 @@
 			(at start (ready-loading ?x))
 			(at start (at ?y ?z))
 			(at start (<= (size ?y) (remaining-capacity ?x)))
-			(over all (= (available-in ?x) 0))
-			(over all (= (available-in ?y) 0)))
+			(over all (available ?x))
+			(over all (available ?y)))
 		:effect	(and
 			(at start (not (at ?y ?z)))
 			(at start (decrease (current-inventory ?z) (size ?y)))
@@ -47,8 +47,8 @@
 			(at start (ready-loading ?x))
 			(at start (in ?y ?x))
 			(at start (<= (size ?y) (remaining-capacity ?z)))
-			(over all (= (available-in ?x) 0))
-			(over all (= (available-in ?y) 0)))
+			(over all (available ?x))
+			(over all (available ?y)))
 		:effect	(and
 			(at start (not (in ?y ?x)))
 			(at start (decrease (remaining-capacity ?z) (size ?y)))
@@ -66,17 +66,9 @@
 			(at start (at ?x ?y))
 			(at start (>= (travel-time ?x ?y ?z) 0))
 			(at start (not (= ?y ?z)))
-			(over all (= (available-in ?x) 0)))
+			(over all (available ?x)))
 		:effect	(and
 			(at start (not (at ?x ?y)))
 			(at end (at ?x ?z))
 			(at end (increase (total-cost) (travel-time ?x ?y ?z)))))
-	(:durative-action wait
-		:parameters (?x - (either TRANSPORT CARGO) ?y - LOCATION)
-		:duration (= ?duration 1)
-		:condition (and
-			(at start (> (available-in ?x) 0))
-			(over all (at ?x ?y)))
-		:effect (and
-			(at end (decrease (available-in ?x) 1))))
 )

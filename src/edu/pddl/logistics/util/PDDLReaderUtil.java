@@ -30,7 +30,7 @@ public class PDDLReaderUtil {
 	private static final String ROUTES_DELIMETER = "\t\t(= (travel-time ";
 	private static final String LOAD_DELIMETER = "\t\t(= (load-time ";
 	private static final String UNLOAD_DELIMETER = "\t\t(= (unload-time ";
-	private static final String AVAILABLE_DELIMETER = "\t\t(= (available-in ";
+	private static final String AVAILABLE_DELIMETER = ".+\\(at \\d+ \\(available.+\\)\\)";
 	private static final String SIZE_DELIMETER = "\t\t(= (size ";
 
 	public static PDDLProblem readProblem(File file) throws IOException {
@@ -48,7 +48,7 @@ public class PDDLReaderUtil {
 		model.getLocations().addAll(locations);
 		model.getTransports().addAll(transports);
 		model.getCargos().addAll(cargos);
-		
+
 		return model;
 	}
 
@@ -60,8 +60,7 @@ public class PDDLReaderUtil {
 		String line = reader.readLine();
 		while (line != null) {
 			if (line.contains(CARGO_DEFINITION_DELIMETER)) {
-				String names = line.split(CARGO_DEFINITION_DELIMETER)[0]
-						.trim();
+				String names = line.split(CARGO_DEFINITION_DELIMETER)[0].trim();
 				String[] cargoNames = names.split(" ");
 				for (String cargoName : cargoNames) {
 					Cargo cargo = new Cargo(cargoName, 0, 0);
@@ -79,8 +78,7 @@ public class PDDLReaderUtil {
 				String[] parts = data.split("\\)");
 				String name = parts[0].trim();
 				String size = parts[1].trim();
-				Cargo cargo = CargoUtil.getCargoByName(name,
-						cargos);
+				Cargo cargo = CargoUtil.getCargoByName(name, cargos);
 				if (cargo != null) {
 					cargo.setSize(Integer.parseInt(size));
 				}
@@ -96,8 +94,7 @@ public class PDDLReaderUtil {
 				String[] parts = data.split(" ");
 				String name = parts[0].trim();
 				String loc = parts[1].replace(')', ' ').trim();
-				Cargo cargo = CargoUtil.getCargoByName(name,
-						cargos);
+				Cargo cargo = CargoUtil.getCargoByName(name, cargos);
 				Location location = LocationUtil.getLocationByName(loc,
 						locations);
 				if ((cargo != null) && (location != null)) {
@@ -110,13 +107,11 @@ public class PDDLReaderUtil {
 		reader.seek(0);
 		line = reader.readLine();
 		while (line != null) {
-			if (line.contains(AVAILABLE_DELIMETER)) {
-				String data = line.substring(AVAILABLE_DELIMETER.length());
-				String[] parts = data.split(" ");
-				String name = parts[0].replace(')', ' ').trim();
-				String available = parts[1].replace(')', ' ').trim();
-				Cargo cargo = CargoUtil.getCargoByName(name,
-						cargos);
+			if (line.matches(AVAILABLE_DELIMETER)) {
+				String[] parts = line.split(" ");
+				String name = parts[3].replace(')', ' ').trim();
+				String available = parts[1].trim();
+				Cargo cargo = CargoUtil.getCargoByName(name, cargos);
 				if (cargo != null) {
 					cargo.setAvailableIn(Integer.parseInt(available));
 				}
@@ -262,11 +257,10 @@ public class PDDLReaderUtil {
 		reader.seek(0);
 		line = reader.readLine();
 		while (line != null) {
-			if (line.contains(AVAILABLE_DELIMETER)) {
-				String data = line.substring(AVAILABLE_DELIMETER.length());
-				String[] parts = data.split(" ");
-				String name = parts[0].replace(')', ' ').trim();
-				String available = parts[1].replace(')', ' ').trim();
+			if (line.matches(AVAILABLE_DELIMETER)) {
+				String[] parts = line.split(" ");
+				String name = parts[3].replace(')', ' ').trim();
+				String available = parts[1].trim();
 				Transport transport = TransportUtil.getTransportByName(name,
 						transports);
 				if (transport != null) {

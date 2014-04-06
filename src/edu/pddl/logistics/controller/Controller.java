@@ -227,7 +227,7 @@ public class Controller {
 
 	public void setTransportInitialLocation(Transport transport,
 			Location location) {
-		if (!transport.getInitialLocation().equals(location)) {
+		if (!location.equals(transport.getInitialLocation())) {
 			transport.setInitialLocation(location);
 			ActionEvent event = new ActionEvent(transport,
 					ActionEvent.ACTION_PERFORMED, Constants.OPERATION_UPDATE);
@@ -295,7 +295,7 @@ public class Controller {
 	}
 
 	public void setCargoInitialLocation(Cargo cargo, Location location) {
-		if (!cargo.getInitialLocation().equals(location)) {
+		if (!location.equals(cargo.getInitialLocation())) {
 			cargo.setInitialLocation(location);
 			ActionEvent event = new ActionEvent(cargo,
 					ActionEvent.ACTION_PERFORMED, Constants.OPERATION_UPDATE);

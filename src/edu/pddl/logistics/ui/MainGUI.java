@@ -159,7 +159,15 @@ public class MainGUI extends JFrame implements ActionListener, FocusListener {
 		int returnValue = fileChooser.showSaveDialog(this);
 		if (returnValue == JFileChooser.APPROVE_OPTION) {
 			File selectedFile = fileChooser.getSelectedFile();
-			if (selectedFile.getName().lastIndexOf('.') == -1) {
+			if (selectedFile.exists()) {
+				int option = JOptionPane.showConfirmDialog(this, "Are you sure you would like to overwrite "
+						+ selectedFile.getName(), "File Exists!",
+						JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+				if (option == JOptionPane.NO_OPTION) {
+					return;
+				}
+			}
+			else if (selectedFile.getName().lastIndexOf('.') == -1) {
 				selectedFile = new File(selectedFile + ".pddl");
 			}
 			try {
