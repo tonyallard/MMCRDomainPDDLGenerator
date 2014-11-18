@@ -1,11 +1,11 @@
-LogisticsDomainPDDLGenerator
-============================
+Multi-Modal Cargo Routing Domain PDDL Generator
+==============================================
 
-The Logistics Domain PDDL Generator is a Java program that allows the creation of planning problems within the Logistics Domain using a Graphical User Interface (GUI).
+The Multi-Modal Cargo Routing (MMCR) Domain PDDL Generator is a Java program that allows the creation of planning problems within the MMCR Domain using a Graphical User Interface (GUI).
 
-The logistics domain describes a problem involving by an undirected acyclic graph, G. The graph contains a set of nodes or vertices, L, connected by edges as defined by an adjacency matrix E. The set of nodes L represent geographical locations. Locations could be cities, supply depots, etc. And the adjacency matrix a network of connections. The graph is not necessarily fully connected. The problem iteself is characterised by cargo existing at certain origin nodes within the graph. The goal or solution to the problem is to move this cargo through the network to a destination specific destination node. The movement of cargo is facilitated by transports specified within the problem definition. These transport have limited abilities to hold certain amounts of cargo (as do nodes), travel certain routes at certain speeds and load/unload at different rates.
+The MMCR domain describes a problem involving by an undirected acyclic graph, G. The graph contains a set of nodes or vertices, L, connected by edges as defined by an adjacency matrix E. The set of nodes L represent geographical locations. Locations could be cities, supply depots, etc. and the adjacency matrix a network of connections. The graph is not necessarily fully connected. The problem iteself is characterised by cargoes existing at certain origin nodes within the graph. The goal to the problem is to move the cargo through the network to a cargo's specific destination node. The movement of cargo is facilitated by vehicles specified within the problem definition. These vehicle's have limited abilities to hold certain amounts of cargo (as do nodes), travel certain routes at certain speeds and load/unload at different rates.
 
-The Logistics Domain PDDL Generator provides a simple user interface to define these problems and generate the associated PDDL to feed into automated planners that use this definition language.
+The MMCR Domain PDDL Generator provides a simple user interface to define these problems and generate the associated PDDL to feed into automated planners that use this definition language.
 
 The software generates the problem PDDL and also the domain file PDDL. The only thing that the software currently does not generate are the goal conditions.
 
