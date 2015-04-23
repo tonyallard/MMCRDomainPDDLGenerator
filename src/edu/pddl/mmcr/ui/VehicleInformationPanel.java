@@ -26,7 +26,7 @@ import edu.pddl.mmcr.model.Location;
 import edu.pddl.mmcr.model.Vehicle;
 
 /**
- * This class is the root Transport UI Class
+ * This class is the root Vehicle UI Class
  * @author tony
  *
  */
@@ -54,11 +54,11 @@ public class VehicleInformationPanel extends JPanel implements
 		this.controller = controller;
 		this.controller.addActionListener(this);
 		setLayout(new BorderLayout());
-		initTransportPanel();
-		initOtherTransportPanels();
+		initVehiclePanel();
+		initOtherVehiclePanels();
 	}
 
-	private void initTransportPanel() {
+	private void initVehiclePanel() {
 		Object[] columnNames = { "Name", "Initial Location",
 				"Remaining Capacity", "Available At" };
 		Object[][] data = { { vehicle.getName(),
@@ -127,7 +127,7 @@ public class VehicleInformationPanel extends JPanel implements
 		add(northPanel, BorderLayout.NORTH);
 	}
 
-	private void initOtherTransportPanels() {
+	private void initOtherVehiclePanels() {
 		JPanel centerPanel = new JPanel(new BorderLayout());
 		this.vehicleRoutePanel = new VehicleRoutePanel(vehicle, controller);
 		this.vehicleLoadUnloadPanel = new VehicleLoadUnloadPanel(vehicle, controller);
@@ -136,14 +136,14 @@ public class VehicleInformationPanel extends JPanel implements
 		add(centerPanel, BorderLayout.CENTER);
 	}
 
-	private void updateVehicle(Vehicle transport) {
+	private void updateVehicle(Vehicle vehicle) {
 		@SuppressWarnings("unchecked")
 		Vector<Object> rowData = (Vector<Object>) vehicleTableModel
 				.getDataVector().get(0);
-		rowData.setElementAt(transport.getName(), 0);
-		rowData.setElementAt(transport.getInitialLocation(), 1);
-		rowData.setElementAt(transport.getRemainingCapacity(), 2);
-		rowData.setElementAt(transport.getAvailableIn(), 3);
+		rowData.setElementAt(vehicle.getName(), 0);
+		rowData.setElementAt(vehicle.getInitialLocation(), 1);
+		rowData.setElementAt(vehicle.getRemainingCapacity(), 2);
+		rowData.setElementAt(vehicle.getAvailableIn(), 3);
 	}
 
 	@Override

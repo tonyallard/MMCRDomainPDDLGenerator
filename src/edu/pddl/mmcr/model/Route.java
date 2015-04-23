@@ -1,21 +1,21 @@
 package edu.pddl.mmcr.model;
 
 public class Route {
-	private Vehicle transport = null;
+	private Vehicle vehicle = null;
 	private Location origin = null;
 	private Location destination = null;
 	private int travelTime = 0;
 	
-	public Route(Vehicle transport, Location origin, Location destination,
+	public Route(Vehicle vehicle, Location origin, Location destination,
 			int travelTime) {
 		super();
-		this.transport = transport;
+		this.vehicle = vehicle;
 		this.origin = origin;
 		this.destination = destination;
 		this.travelTime = travelTime;
 	}
-	public Vehicle getTransport() {
-		return transport;
+	public Vehicle getVehicle() {
+		return vehicle;
 	}
 	public Location getOrigin() {
 		return origin;

@@ -36,10 +36,10 @@ public class VehicleManagementPanel extends JPanel implements ActionListener {
 		this.vehicleToTabIndexMap = new IdentityHashMap<Vehicle, Integer>();
 
 		setLayout(new BorderLayout());
-		initTransportPanel();
+		initVehiclePanel();
 	}
 
-	private void initTransportPanel() {
+	private void initVehiclePanel() {
 		tabbedPane = new JTabbedPane();
 		add(tabbedPane, BorderLayout.CENTER);
 
@@ -63,10 +63,10 @@ public class VehicleManagementPanel extends JPanel implements ActionListener {
 	}
 
 	private void addVehicle(Vehicle vehicle) {
-		VehicleInformationPanel tptPanel = new VehicleInformationPanel(
+		VehicleInformationPanel vehPanel = new VehicleInformationPanel(
 				vehicle, controller);
 		vehicleToTabIndexMap.put(vehicle, tabbedPane.getTabCount());
-		tabbedPane.addTab(vehicle.getName(), tptPanel);
+		tabbedPane.addTab(vehicle.getName(), vehPanel);
 	}
 
 	private void removeVehicle() {
