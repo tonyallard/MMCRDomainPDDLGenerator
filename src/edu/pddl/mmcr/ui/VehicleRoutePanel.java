@@ -23,21 +23,21 @@ import javax.swing.text.JTextComponent;
 import edu.pddl.mmcr.controller.Constants;
 import edu.pddl.mmcr.controller.Controller;
 import edu.pddl.mmcr.model.Location;
-import edu.pddl.mmcr.model.Transport;
+import edu.pddl.mmcr.model.Vehicle;
 
 /**
  * 
  * @author tony
  *
  */
-public class TransportRoutePanel extends JPanel implements ActionListener,
+public class VehicleRoutePanel extends JPanel implements ActionListener,
 		TableModelListener {
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -6952549289264640594L;
 
-	private Transport transport = null;
+	private Vehicle vehicle = null;
 	private Controller controller = null;
 
 	private JTable routeTable = null;
@@ -46,8 +46,8 @@ public class TransportRoutePanel extends JPanel implements ActionListener,
 	private Map<Location, Integer> locationToRowMap = null; // Origins
 	private Map<Location, Integer> locationToColumnMap = null; // Destinations
 
-	public TransportRoutePanel(Transport transport, Controller controller) {
-		this.transport = transport;
+	public VehicleRoutePanel(Vehicle vehicle, Controller controller) {
+		this.vehicle = vehicle;
 		this.controller = controller;
 		this.controller.addActionListener(this);
 		this.locationToRowMap = new IdentityHashMap<Location, Integer>();
@@ -59,7 +59,7 @@ public class TransportRoutePanel extends JPanel implements ActionListener,
 	}
 
 	private void initRoutes() {
-		Map<Location, Map<Location, Integer>> routes = transport.getRoutes();
+		Map<Location, Map<Location, Integer>> routes = vehicle.getRoutes();
 		for (Location origin : routes.keySet()) {
 			Map<Location, Integer> destinationTimeMap = routes.get(origin);
 			int row = locationToRowMap.get(origin);
@@ -128,7 +128,7 @@ public class TransportRoutePanel extends JPanel implements ActionListener,
 		};
 		routeTable.setRowHeight(25);
 		routeTable.setDefaultRenderer(Integer.class,
-				new TransportLocationTableCellRenderer());
+				new RouteTableCellRenderer());
 		routeTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		routeTable.getTableHeader().setReorderingAllowed(false);
 
@@ -213,13 +213,13 @@ public class TransportRoutePanel extends JPanel implements ActionListener,
 				String newValue = newObj.toString();
 				int travelTime = Integer.parseInt(newValue);
 				if (travelTime < 0) {
-					throw new RuntimeException("Transport route travel time cannot be negative.");
+					throw new RuntimeException("Vehicle route travel time cannot be negative.");
 				}
-				controller.setTransportRoute(transport, origin,
+				controller.setVehicleRoute(vehicle, origin,
 						destination, travelTime);
 				return;
 			}
-			controller.removeTransportRoute(transport, origin, destination);
+			controller.removeVehicleRoute(vehicle, origin, destination);
 		}
 	}
 

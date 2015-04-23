@@ -12,7 +12,7 @@ import edu.pddl.mmcr.exception.PDDLModelIncompleteException;
 import edu.pddl.mmcr.model.Cargo;
 import edu.pddl.mmcr.model.Location;
 import edu.pddl.mmcr.model.PDDLProblem;
-import edu.pddl.mmcr.model.Transport;
+import edu.pddl.mmcr.model.Vehicle;
 import edu.pddl.mmcr.util.LocationUtil;
 import edu.pddl.mmcr.util.PDDLReaderUtil;
 import edu.pddl.mmcr.util.PDDLWriterUtil;
@@ -65,7 +65,7 @@ public class Controller {
 	public void save(File selectedFile) throws IOException,
 			PDDLModelIncompleteException {
 		PDDLWriterUtil.writeProblem(selectedFile, model.getProblemName(),
-				model.getLocations(), model.getTransports(), model.getCargos());
+				model.getLocations(), model.getVehicles(), model.getCargos());
 		fileChangedFlag = false;
 	}
 
@@ -101,15 +101,15 @@ public class Controller {
 
 	public void removeLocation(Location location) {
 		model.getLocations().remove(location);
-		for (Transport transport : model.getTransports()) {
-			if (transport.getInitialLocation() == location) {
-				transport.setInitialLocation(null);
-				ActionEvent event = new ActionEvent(transport,
+		for (Vehicle vehicle : model.getVehicles()) {
+			if (vehicle.getInitialLocation() == location) {
+				vehicle.setInitialLocation(null);
+				ActionEvent event = new ActionEvent(vehicle,
 						ActionEvent.ACTION_PERFORMED,
 						Constants.OPERATION_UPDATE);
 				notifyListeners(event);
 			}
-			transport.removeRouteWithLocation(location);
+			vehicle.removeRouteWithLocation(location);
 		}
 		for (Cargo cargo : model.getCargos()) {
 			if (cargo.getInitialLocation() == location) {
@@ -154,119 +154,119 @@ public class Controller {
 		fileChangedFlag = true;
 	}
 
-	// TRANSPORT CRUD METHODS
-	public void addNewTransport() {
-		Transport transport = new Transport();
-		model.getTransports().add(transport);
-		ActionEvent event = new ActionEvent(transport,
+	// VEHICLE CRUD METHODS
+	public void addNewVehicle() {
+		Vehicle vehicle = new Vehicle();
+		model.getVehicles().add(vehicle);
+		ActionEvent event = new ActionEvent(vehicle,
 				ActionEvent.ACTION_PERFORMED, Constants.OPERATION_CREATE);
 		notifyListeners(event);
 		fileChangedFlag = true;
 	}
 
-	public void removeTransport(Transport transport) {
-		model.getTransports().remove(transport);
-		ActionEvent event = new ActionEvent(transport,
+	public void removeVehicle(Vehicle vehicle) {
+		model.getVehicles().remove(vehicle);
+		ActionEvent event = new ActionEvent(vehicle,
 				ActionEvent.ACTION_PERFORMED, Constants.OPERATION_DELETE);
 		notifyListeners(event);
 		fileChangedFlag = true;
 	}
 
-	public void setTransportName(Transport transport, String newName) {
-		if (!transport.getName().equals(newName)) {
-			transport.setName(newName);
-			ActionEvent event = new ActionEvent(transport,
+	public void setVehicleName(Vehicle vehicle, String newName) {
+		if (!vehicle.getName().equals(newName)) {
+			vehicle.setName(newName);
+			ActionEvent event = new ActionEvent(vehicle,
 					ActionEvent.ACTION_PERFORMED, Constants.OPERATION_UPDATE);
 			notifyListeners(event);
 			fileChangedFlag = true;
 		}
 	}
 
-	public void setTransportRemainingCapacity(Transport transport,
+	public void setVehicleRemainingCapacity(Vehicle vehicle,
 			int remainingCapacity) {
-		if (transport.getRemainingCapacity() != remainingCapacity) {
-			transport.setRemainingCapacity(remainingCapacity);
-			ActionEvent event = new ActionEvent(transport,
+		if (vehicle.getRemainingCapacity() != remainingCapacity) {
+			vehicle.setRemainingCapacity(remainingCapacity);
+			ActionEvent event = new ActionEvent(vehicle,
 					ActionEvent.ACTION_PERFORMED, Constants.OPERATION_UPDATE);
 			notifyListeners(event);
 			fileChangedFlag = true;
 		}
 	}
 
-	public void setTransportLoadingTime(Transport transport, Location loc, Integer loadingTime) {
-		if (!loadingTime.equals(transport.getLoadingTime(loc))) {
-			transport.setLoadingTime(loc, loadingTime);
-			ActionEvent event = new ActionEvent(transport,
+	public void setVehicleLoadingTime(Vehicle vehicle, Location loc, Integer loadingTime) {
+		if (!loadingTime.equals(vehicle.getLoadingTime(loc))) {
+			vehicle.setLoadingTime(loc, loadingTime);
+			ActionEvent event = new ActionEvent(vehicle,
 					ActionEvent.ACTION_PERFORMED, Constants.OPERATION_UPDATE);
 			notifyListeners(event);
 			fileChangedFlag = true;
 		}
 	}
 	
-	public void removeTransportLoadingTime(Transport transport,
+	public void removeVehicleLoadingTime(Vehicle vehicle,
 			Location location) {
-		transport.removeLoadingTime(location);
-		ActionEvent event = new ActionEvent(transport,
+		vehicle.removeLoadingTime(location);
+		ActionEvent event = new ActionEvent(vehicle,
 				ActionEvent.ACTION_PERFORMED, Constants.OPERATION_UPDATE);
 		notifyListeners(event);
 		fileChangedFlag = true;	
 	}
 
-	public void setTransportUnloadingTime(Transport transport, Location loc, Integer unloadingTime) {
-		if (!unloadingTime.equals(transport.getUnloadingTime(loc))) {
-			transport.setUnloadingTime(loc, unloadingTime);
-			ActionEvent event = new ActionEvent(transport,
+	public void setVehicleUnloadingTime(Vehicle vehicle, Location loc, Integer unloadingTime) {
+		if (!unloadingTime.equals(vehicle.getUnloadingTime(loc))) {
+			vehicle.setUnloadingTime(loc, unloadingTime);
+			ActionEvent event = new ActionEvent(vehicle,
 					ActionEvent.ACTION_PERFORMED, Constants.OPERATION_UPDATE);
 			notifyListeners(event);
 			fileChangedFlag = true;
 		}
 	}
 
-	public void removeTransportUnloadingTime(Transport transport,
+	public void removeVehicleUnloadingTime(Vehicle vehicle,
 			Location location) {
-		transport.removeUnloadingTime(location);
-		ActionEvent event = new ActionEvent(transport,
+		vehicle.removeUnloadingTime(location);
+		ActionEvent event = new ActionEvent(vehicle,
 				ActionEvent.ACTION_PERFORMED, Constants.OPERATION_UPDATE);
 		notifyListeners(event);
 		fileChangedFlag = true;			
 	}
 
-	public void setTransportInitialLocation(Transport transport,
+	public void setVehicleInitialLocation(Vehicle vehicle,
 			Location location) {
-		if (!location.equals(transport.getInitialLocation())) {
-			transport.setInitialLocation(location);
-			ActionEvent event = new ActionEvent(transport,
+		if (!location.equals(vehicle.getInitialLocation())) {
+			vehicle.setInitialLocation(location);
+			ActionEvent event = new ActionEvent(vehicle,
 					ActionEvent.ACTION_PERFORMED, Constants.OPERATION_UPDATE);
 			notifyListeners(event);
 			fileChangedFlag = true;
 		}
 	}
 
-	public void setTransportAvailableIn(Transport transport, int availableIn) {
-		if (transport.getAvailableIn() != availableIn) {
-			transport.setAvailableIn(availableIn);
-			ActionEvent event = new ActionEvent(transport,
+	public void setVehicleAvailableIn(Vehicle vehicle, int availableIn) {
+		if (vehicle.getAvailableIn() != availableIn) {
+			vehicle.setAvailableIn(availableIn);
+			ActionEvent event = new ActionEvent(vehicle,
 					ActionEvent.ACTION_PERFORMED, Constants.OPERATION_UPDATE);
 			notifyListeners(event);
 			fileChangedFlag = true;
 		}
 	}
 
-	public void setTransportRoute(Transport transport, Location origin,
+	public void setVehicleRoute(Vehicle vehicle, Location origin,
 			Location destination, Integer travelTime) {
-		if (transport.getRouteTravelTime(origin, destination) != travelTime) {
-			transport.updateRoute(origin, destination, travelTime);
-			ActionEvent event = new ActionEvent(transport,
+		if (vehicle.getRouteTravelTime(origin, destination) != travelTime) {
+			vehicle.updateRoute(origin, destination, travelTime);
+			ActionEvent event = new ActionEvent(vehicle,
 					ActionEvent.ACTION_PERFORMED, Constants.OPERATION_UPDATE);
 			notifyListeners(event);
 		}
 		fileChangedFlag = true;
 	}
 
-	public void removeTransportRoute(Transport transport, Location origin,
+	public void removeVehicleRoute(Vehicle vehicle, Location origin,
 			Location destination) {
-		transport.removeRoute(origin, destination);
-		ActionEvent event = new ActionEvent(transport,
+		vehicle.removeRoute(origin, destination);
+		ActionEvent event = new ActionEvent(vehicle,
 				ActionEvent.ACTION_PERFORMED, Constants.OPERATION_UPDATE);
 		notifyListeners(event);
 		fileChangedFlag = true;
@@ -355,8 +355,8 @@ public class Controller {
 			notifyListeners(event);
 		}
 		
-		for (Transport transport : model.getTransports()) {
-			ActionEvent event = new ActionEvent(transport,
+		for (Vehicle vehicle : model.getVehicles()) {
+			ActionEvent event = new ActionEvent(vehicle,
 					ActionEvent.ACTION_PERFORMED, Constants.OPERATION_CREATE);
 			notifyListeners(event);
 		}

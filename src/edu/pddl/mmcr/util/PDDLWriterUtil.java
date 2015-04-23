@@ -13,7 +13,7 @@ import java.util.Map;
 import edu.pddl.mmcr.exception.PDDLModelIncompleteException;
 import edu.pddl.mmcr.model.Cargo;
 import edu.pddl.mmcr.model.Location;
-import edu.pddl.mmcr.model.Transport;
+import edu.pddl.mmcr.model.Vehicle;
 
 public class PDDLWriterUtil {
 	private static final String DOMAIN_FILENAME = "MMCR.pddl";
@@ -22,7 +22,7 @@ public class PDDLWriterUtil {
 	}
 
 	public static void writeProblem(File file, String problemName,
-			List<Location> locations, List<Transport> transports,
+			List<Location> locations, List<Vehicle> vehicles,
 			List<Cargo> cargos) throws IOException,
 			PDDLModelIncompleteException {
 		BufferedWriter bw = new BufferedWriter(new FileWriter(file, false));
@@ -34,12 +34,12 @@ public class PDDLWriterUtil {
 		// OBJECT DEFINITION
 		bw.write("\t(:objects");
 		bw.newLine();
-		// define transports
-		String transportNames = "";
-		for (Transport tpt : transports) {
-			transportNames += tpt.getName() + " ";
+		// define vehciles
+		String vehicleNames = "";
+		for (Vehicle veh : vehicles) {
+			vehicleNames += veh.getName() + " ";
 		}
-		bw.write("\t\t" + transportNames + " - VEHICLE");
+		bw.write("\t\t" + vehicleNames + " - VEHICLE");
 		bw.newLine();
 		// define locations
 		String locationNames = "";
@@ -59,22 +59,22 @@ public class PDDLWriterUtil {
 		// INITIAL STATE
 		bw.write("\t(:init");
 		bw.newLine();
-		// Initial transport locations
-		for (Transport tpt : transports) {
-			if (tpt.getInitialLocation() == null) {
+		// Initial vehicle locations
+		for (Vehicle veh : vehicles) {
+			if (veh.getInitialLocation() == null) {
 				bw.close();
 				throw new PDDLModelIncompleteException("Vehicle "
-						+ tpt.getName() + " does not have an initial location.");
+						+ veh.getName() + " does not have an initial location.");
 			}
-			bw.write("\t\t(at " + tpt.getName() + " "
-					+ tpt.getInitialLocation().getName() + ")");
+			bw.write("\t\t(at " + veh.getName() + " "
+					+ veh.getInitialLocation().getName() + ")");
 			bw.newLine();
 		}
 		// Initial cargo locations
 		for (Cargo cargo : cargos) {
 			if (cargo.getInitialLocation() == null) {
 				bw.close();
-				throw new PDDLModelIncompleteException("Transport "
+				throw new PDDLModelIncompleteException("Cargo "
 						+ cargo.getName()
 						+ " does not have an initial location.");
 			}
@@ -82,15 +82,15 @@ public class PDDLWriterUtil {
 					+ cargo.getInitialLocation().getName() + ")");
 			bw.newLine();
 		}
-		// Transport Ready for Loading
-		for (Transport tpt : transports) {
-			bw.write("\t\t(ready-loading " + tpt.getName() + ")");
+		// Vehicle Ready for Loading
+		for (Vehicle veh : vehicles) {
+			bw.write("\t\t(ready-loading " + veh.getName() + ")");
 			bw.newLine();
 		}
-		// Transport Capacity
-		for (Transport tpt : transports) {
-			bw.write("\t\t(= (remaining-capacity " + tpt.getName() + ") "
-					+ tpt.getRemainingCapacity() + ")");
+		// Vehicle Capacity
+		for (Vehicle veh : vehicles) {
+			bw.write("\t\t(= (remaining-capacity " + veh.getName() + ") "
+					+ veh.getRemainingCapacity() + ")");
 			bw.newLine();
 		}
 		// Location Capacity
@@ -102,15 +102,15 @@ public class PDDLWriterUtil {
 				bw.newLine();
 			}
 		}
-		// Transport Routes
-		for (Transport tpt : transports) {
-			Map<Location, Map<Location, Integer>> routes = tpt.getRoutes();
+		// Vehicle Routes
+		for (Vehicle veh : vehicles) {
+			Map<Location, Map<Location, Integer>> routes = veh.getRoutes();
 			for (Location origin : routes.keySet()) {
 				Map<Location, Integer> destinationDistanceMap = routes
 						.get(origin);
 				for (Location destination : destinationDistanceMap.keySet()) {
 					Integer distance = destinationDistanceMap.get(destination);
-					bw.write("\t\t(= (travel-time " + tpt.getName() + " "
+					bw.write("\t\t(= (travel-time " + veh.getName() + " "
 							+ origin.getName() + " " + destination.getName()
 							+ ") " + distance + ")");
 					bw.newLine();
@@ -123,35 +123,35 @@ public class PDDLWriterUtil {
 					+ ")");
 			bw.newLine();
 		}
-		// Transport Load Times
-		for (Transport tpt : transports) {
-			for (Location loc : tpt.getLoadingTimes().keySet()) {
-				Integer loadingTime = tpt.getLoadingTime(loc);
-				bw.write("\t\t(= (load-time " + tpt.getName() + " "
+		// Vehicle Load Times
+		for (Vehicle veh : vehicles) {
+			for (Location loc : veh.getLoadingTimes().keySet()) {
+				Integer loadingTime = veh.getLoadingTime(loc);
+				bw.write("\t\t(= (load-time " + veh.getName() + " "
 						+ loc.getName() + ") " + loadingTime + ")");
 				bw.newLine();
 			}
 		}
-		// Transport Unload Times
-		for (Transport tpt : transports) {
-			for (Location loc : tpt.getUnloadingTimes().keySet()) {
-				Integer unloadingTime = tpt.getUnloadingTime(loc);
-				bw.write("\t\t(= (unload-time " + tpt.getName() + " "
+		// Vehicle Unload Times
+		for (Vehicle veh : vehicles) {
+			for (Location loc : veh.getUnloadingTimes().keySet()) {
+				Integer unloadingTime = veh.getUnloadingTime(loc);
+				bw.write("\t\t(= (unload-time " + veh.getName() + " "
 						+ loc.getName() + ") " + unloadingTime + ")");
 				bw.newLine();
 			}
 		}
-		// Transport Available Times
-		for (Transport tpt : transports) {
+		// Vehicle Available Times
+		for (Vehicle veh : vehicles) {
 			// If no timed availability omit TIL
-			if (tpt.getAvailableIn() == 0) {
-				bw.write("\t\t(available " + tpt.getName() + ")");
+			if (veh.getAvailableIn() == 0) {
+				bw.write("\t\t(available " + veh.getName() + ")");
 				bw.newLine();
 			} else { // otherwise add it
-				bw.write("\t\t(not (available " + tpt.getName() + "))");
+				bw.write("\t\t(not (available " + veh.getName() + "))");
 				bw.newLine();
-				bw.write("\t\t(at " + tpt.getAvailableIn() + " (available "
-						+ tpt.getName() + "))");
+				bw.write("\t\t(at " + veh.getAvailableIn() + " (available "
+						+ veh.getName() + "))");
 				bw.newLine();
 			}
 		}

@@ -23,9 +23,9 @@ import javax.swing.text.JTextComponent;
 import edu.pddl.mmcr.controller.Constants;
 import edu.pddl.mmcr.controller.Controller;
 import edu.pddl.mmcr.model.Location;
-import edu.pddl.mmcr.model.Transport;
+import edu.pddl.mmcr.model.Vehicle;
 
-public class TransportLoadUnloadPanel extends JPanel implements ActionListener,
+public class VehicleLoadUnloadPanel extends JPanel implements ActionListener,
 		TableModelListener {
 
 	/**
@@ -33,22 +33,22 @@ public class TransportLoadUnloadPanel extends JPanel implements ActionListener,
 	 */
 	private static final long serialVersionUID = -5502210460884451123L;
 
-	private Transport transport = null;
+	private Vehicle vehicle = null;
 	private Controller controller = null;
 
 	private JTable loadUnloadTable = null;
 	private DefaultTableModel loadUnloadTableModel = null;
 	private Map<Location, Integer> locationToRowMap = null; // locations
 
-	public TransportLoadUnloadPanel(Transport transport, Controller controller) {
-		this.transport = transport;
+	public VehicleLoadUnloadPanel(Vehicle vehicle, Controller controller) {
+		this.vehicle = vehicle;
 		this.controller = controller;
 		this.controller.addActionListener(this);
 		this.locationToRowMap = new HashMap<>();
 		setLayout(new BorderLayout());
 		initLoadUnloadTable();
 		initLocations();
-		initTransport();
+		initVehicle();
 	}
 
 	private void initLocations() {
@@ -128,11 +128,11 @@ public class TransportLoadUnloadPanel extends JPanel implements ActionListener,
 		add(centerPanel, BorderLayout.CENTER);
 	}
 
-	private void initTransport() {
+	private void initVehicle() {
 		for (Location loc : controller.getLocations()) {
 			Integer row = locationToRowMap.get(loc);
-			Integer loadingTime = transport.getLoadingTime(loc);
-			Integer unloadingTime = transport.getUnloadingTime(loc);
+			Integer loadingTime = vehicle.getLoadingTime(loc);
+			Integer unloadingTime = vehicle.getUnloadingTime(loc);
 			@SuppressWarnings("unchecked")
 			Vector<Object> rowData = (Vector<Object>) loadUnloadTableModel
 					.getDataVector().get(row);
@@ -201,7 +201,7 @@ public class TransportLoadUnloadPanel extends JPanel implements ActionListener,
 			Location location = getLocationFromRow(row);
 			switch (col) {
 			case 0:
-				// This is the location name row do nothingtravelTimeme
+				// This is the location name row do nothing
 				break;
 			case 1:
 				// This is loading time
@@ -211,14 +211,14 @@ public class TransportLoadUnloadPanel extends JPanel implements ActionListener,
 						Integer loadingTime = Integer.parseInt(newValue);
 						if (loadingTime < 0) {
 							throw new RuntimeException(
-									"Transport loading time cannot be negative");
+									"Vehicle loading time cannot be negative");
 						}
-						controller.setTransportLoadingTime(transport, location,
+						controller.setVehicleLoadingTime(vehicle, location,
 								loadingTime);
 						break;
 					}
 				}
-				controller.removeTransportLoadingTime(transport, location);
+				controller.removeVehicleLoadingTime(vehicle, location);
 				break;
 			case 2:
 				// This is unloading time
@@ -228,14 +228,14 @@ public class TransportLoadUnloadPanel extends JPanel implements ActionListener,
 						Integer unloadingTime = Integer.parseInt(newValue);
 						if (unloadingTime < 0) {
 							throw new RuntimeException(
-									"Transport unloading time cannot be negative");
+									"Vehicle unloading time cannot be negative");
 						}
-						controller.setTransportUnloadingTime(transport,
+						controller.setVehicleUnloadingTime(vehicle,
 								location, unloadingTime);
 						break;
 					}
 				}
-				controller.removeTransportUnloadingTime(transport, location);
+				controller.removeVehicleUnloadingTime(vehicle, location);
 				break;
 			default:
 				// shouldn't get here

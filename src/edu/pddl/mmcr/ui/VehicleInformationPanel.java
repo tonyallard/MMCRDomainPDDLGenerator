@@ -23,14 +23,14 @@ import javax.swing.text.JTextComponent;
 import edu.pddl.mmcr.controller.Constants;
 import edu.pddl.mmcr.controller.Controller;
 import edu.pddl.mmcr.model.Location;
-import edu.pddl.mmcr.model.Transport;
+import edu.pddl.mmcr.model.Vehicle;
 
 /**
  * This class is the root Transport UI Class
  * @author tony
  *
  */
-public class TransportInformationPanel extends JPanel implements
+public class VehicleInformationPanel extends JPanel implements
 		TableModelListener, ActionListener {
 
 	/**
@@ -39,18 +39,18 @@ public class TransportInformationPanel extends JPanel implements
 	private static final long serialVersionUID = 8878364677692218340L;
 	private static final int LOCATION_COLUMN_INDEX = 1;
 
-	private Transport transport = null;
+	private Vehicle vehicle = null;
 	private Controller controller = null;
 
-	private DefaultTableModel transportTableModel = null;
-	private JTable transportTable = null;
+	private DefaultTableModel vehicleTableModel = null;
+	private JTable vehicleTable = null;
 	private DefaultComboBoxModel<Location> comboBoxModel = null;
 	
-	private TransportRoutePanel transportRoutePanel = null;
-	private TransportLoadUnloadPanel transportLoadUnloadPanel = null;
+	private VehicleRoutePanel vehicleRoutePanel = null;
+	private VehicleLoadUnloadPanel vehicleLoadUnloadPanel = null;
 
-	public TransportInformationPanel(Transport transport, Controller controller) {
-		this.transport = transport;
+	public VehicleInformationPanel(Vehicle vehicle, Controller controller) {
+		this.vehicle = vehicle;
 		this.controller = controller;
 		this.controller.addActionListener(this);
 		setLayout(new BorderLayout());
@@ -61,12 +61,12 @@ public class TransportInformationPanel extends JPanel implements
 	private void initTransportPanel() {
 		Object[] columnNames = { "Name", "Initial Location",
 				"Remaining Capacity", "Available At" };
-		Object[][] data = { { transport.getName(),
-				transport.getInitialLocation(),
-				transport.getRemainingCapacity(), transport.getAvailableIn() } };
-		transportTableModel = new DefaultTableModel(data, columnNames);
-		transportTableModel.addTableModelListener(this);
-		transportTable = new JTable(transportTableModel) {
+		Object[][] data = { { vehicle.getName(),
+				vehicle.getInitialLocation(),
+				vehicle.getRemainingCapacity(), vehicle.getAvailableIn() } };
+		vehicleTableModel = new DefaultTableModel(data, columnNames);
+		vehicleTableModel.addTableModelListener(this);
+		vehicleTable = new JTable(vehicleTableModel) {
 
 			private static final long serialVersionUID = 1L;
 
@@ -105,15 +105,15 @@ public class TransportInformationPanel extends JPanel implements
 				return c;
 			}
 		};
-		transportTable.setRowHeight(25);
-		transportTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		transportTable.getTableHeader().setReorderingAllowed(false);
+		vehicleTable.setRowHeight(25);
+		vehicleTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		vehicleTable.getTableHeader().setReorderingAllowed(false);
 
 		comboBoxModel = new DefaultComboBoxModel<Location>(
 				new Vector<Location>(controller.getLocations()));
 
 		for (int i = 0; i < columnNames.length; i++) {
-			TableColumn col = transportTable.getColumnModel().getColumn(i);
+			TableColumn col = vehicleTable.getColumnModel().getColumn(i);
 			if (i == LOCATION_COLUMN_INDEX) {
 				JComboBox<Location> locCombo = new JComboBox<Location>(
 						comboBoxModel);
@@ -122,23 +122,23 @@ public class TransportInformationPanel extends JPanel implements
 		}
 		
 		JPanel northPanel = new JPanel(new BorderLayout());
-		northPanel.add(transportTable.getTableHeader(), BorderLayout.NORTH);
-		northPanel.add(transportTable, BorderLayout.CENTER);
+		northPanel.add(vehicleTable.getTableHeader(), BorderLayout.NORTH);
+		northPanel.add(vehicleTable, BorderLayout.CENTER);
 		add(northPanel, BorderLayout.NORTH);
 	}
 
 	private void initOtherTransportPanels() {
 		JPanel centerPanel = new JPanel(new BorderLayout());
-		this.transportRoutePanel = new TransportRoutePanel(transport, controller);
-		this.transportLoadUnloadPanel = new TransportLoadUnloadPanel(transport, controller);
-		centerPanel.add(transportRoutePanel, BorderLayout.CENTER);
-		centerPanel.add(transportLoadUnloadPanel, BorderLayout.EAST);
+		this.vehicleRoutePanel = new VehicleRoutePanel(vehicle, controller);
+		this.vehicleLoadUnloadPanel = new VehicleLoadUnloadPanel(vehicle, controller);
+		centerPanel.add(vehicleRoutePanel, BorderLayout.CENTER);
+		centerPanel.add(vehicleLoadUnloadPanel, BorderLayout.EAST);
 		add(centerPanel, BorderLayout.CENTER);
 	}
 
-	private void updateTransport(Transport transport) {
+	private void updateVehicle(Vehicle transport) {
 		@SuppressWarnings("unchecked")
-		Vector<Object> rowData = (Vector<Object>) transportTableModel
+		Vector<Object> rowData = (Vector<Object>) vehicleTableModel
 				.getDataVector().get(0);
 		rowData.setElementAt(transport.getName(), 0);
 		rowData.setElementAt(transport.getInitialLocation(), 1);
@@ -150,7 +150,7 @@ public class TransportInformationPanel extends JPanel implements
 	public void tableChanged(TableModelEvent e) {
 		if (e.getType() == TableModelEvent.UPDATE) {
 			int col = e.getColumn();
-			Object newObj = transportTableModel.getValueAt(0, col);
+			Object newObj = vehicleTableModel.getValueAt(0, col);
 			if ((newObj == null) || (newObj.toString().length() <= 0)) {
 				
 			}
@@ -159,18 +159,18 @@ public class TransportInformationPanel extends JPanel implements
 				if (newObj != null) {
 					String newValue = newObj.toString();
 					if (newValue.length() > 0) {
-						controller.setTransportName(transport, newValue);
+						controller.setVehicleName(vehicle, newValue);
 						break;
 					}
 				}
-				throw new RuntimeException("Transport name cannot be null.");
+				throw new RuntimeException("Vehicle name cannot be null.");
 			case 1:
 				if (newObj != null) {
 					String newValue = newObj.toString();
 					if (newValue.length() > 0) {
 						Location location = controller.getLocationByName(newValue);
 						if (location != null) {
-							controller.setTransportInitialLocation(transport, location);
+							controller.setVehicleInitialLocation(vehicle, location);
 							break;
 						}
 					}
@@ -183,26 +183,26 @@ public class TransportInformationPanel extends JPanel implements
 					if (newValue.length() > 0) {
 						int cap = Integer.parseInt(newValue);
 						if (cap < 0) {
-							throw new RuntimeException("Transport capacity cannot be negative.");
+							throw new RuntimeException("Vehicle capacity cannot be negative.");
 						}
-						controller.setTransportRemainingCapacity(transport, cap);
+						controller.setVehicleRemainingCapacity(vehicle, cap);
 						break;
 					}
 				}
-				throw new RuntimeException("Transport capacity cannot be null.");
+				throw new RuntimeException("Vehicle capacity cannot be null.");
 			case 3:
 				if (newObj != null) {
 					String newValue = newObj.toString();
 					if (newValue.length() > 0) {
 						int availableIn = Integer.parseInt(newValue);
 						if (availableIn < 0) {
-							throw new RuntimeException("Transport available in cannot be negative.");
+							throw new RuntimeException("Vehicle available in cannot be negative.");
 						}
-						controller.setTransportAvailableIn(transport, availableIn);
+						controller.setVehicleAvailableIn(vehicle, availableIn);
 						break;
 					}
 				}
-				throw new RuntimeException("Transport available in cannot be null.");
+				throw new RuntimeException("Vehicle available in cannot be null.");
 			}
 		}
 	}
@@ -210,11 +210,11 @@ public class TransportInformationPanel extends JPanel implements
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		Object source = e.getSource();
-		if (source instanceof Transport) {
-			Transport transport = (Transport) source;
+		if (source instanceof Vehicle) {
+			Vehicle vehicle = (Vehicle) source;
 			if (e.getActionCommand().equals(Constants.OPERATION_UPDATE)) {
-				if (this.transport == transport) {
-					updateTransport(transport);
+				if (this.vehicle == vehicle) {
+					updateVehicle(vehicle);
 				}
 			}
 		} else if (source instanceof Location) {

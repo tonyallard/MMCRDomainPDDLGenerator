@@ -4,9 +4,9 @@ import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
-public class Transport {
+public class Vehicle {
 
-	private static int numTransports = 0;
+	private static int numVehicles = 0;
 
 	private String name = null;
 	private int remainingCapacity = 0;
@@ -16,7 +16,7 @@ public class Transport {
 	private Map<Location, Integer> unloadingTimes = null;
 	private int availableIn = 0;
 
-	public Transport(String name, int remainingCapacity,
+	public Vehicle(String name, int remainingCapacity,
 			int availableIn) {
 		super();
 		this.name = name;
@@ -25,11 +25,11 @@ public class Transport {
 		this.routes = new IdentityHashMap<Location, Map<Location, Integer>>();
 		this.loadingTimes = new HashMap<>();
 		this.unloadingTimes = new HashMap<>();
-		numTransports++;
+		numVehicles++;
 	}
 
-	public Transport() {
-		this("T" + (numTransports + 1), 0, 0);
+	public Vehicle() {
+		this("V" + (numVehicles + 1), 0, 0);
 	}
 
 	public void updateRoute(Location origin, Location destination,
@@ -90,8 +90,8 @@ public class Transport {
 		unloadingTimes.remove(loc);		
 	}
 
-	public static int getNumTransports() {
-		return numTransports;
+	public static int getNumVehicles() {
+		return numVehicles;
 	}
 
 	public String getName() {

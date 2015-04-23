@@ -143,7 +143,7 @@ public class MainGUI extends JFrame implements ActionListener, FocusListener {
 	}
 
 	private void initMainPanel() {
-		TransportsManagementPanel tPanel = new TransportsManagementPanel(controller);
+		VehicleManagementPanel tPanel = new VehicleManagementPanel(controller);
 		add(tPanel, BorderLayout.CENTER);
 	}
 

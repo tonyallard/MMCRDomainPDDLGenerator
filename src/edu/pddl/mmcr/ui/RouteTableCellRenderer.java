@@ -8,7 +8,7 @@ import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 
-public class TransportLocationTableCellRenderer extends
+public class RouteTableCellRenderer extends
 		DefaultTableCellRenderer implements TableCellRenderer {
 
 	/**
@@ -16,7 +16,7 @@ public class TransportLocationTableCellRenderer extends
 	 */
 	private static final long serialVersionUID = 7106148298377355762L;
 
-	public TransportLocationTableCellRenderer() {
+	public RouteTableCellRenderer() {
 		setHorizontalAlignment(JLabel.CENTER);
 	}
 
