@@ -1,4 +1,4 @@
-package edu.pddl.logistics.model;
+package edu.pddl.mmcr.model;
 
 import java.util.Vector;
 

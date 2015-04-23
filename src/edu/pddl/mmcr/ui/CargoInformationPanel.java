@@ -1,4 +1,4 @@
-package edu.pddl.logistics.ui;
+package edu.pddl.mmcr.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -26,10 +26,10 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableColumn;
 import javax.swing.text.JTextComponent;
 
-import edu.pddl.logistics.controller.Constants;
-import edu.pddl.logistics.controller.Controller;
-import edu.pddl.logistics.model.Cargo;
-import edu.pddl.logistics.model.Location;
+import edu.pddl.mmcr.controller.Constants;
+import edu.pddl.mmcr.controller.Controller;
+import edu.pddl.mmcr.model.Cargo;
+import edu.pddl.mmcr.model.Location;
 
 public class CargoInformationPanel extends JPanel implements ActionListener,
 		TableModelListener {
@@ -60,7 +60,8 @@ public class CargoInformationPanel extends JPanel implements ActionListener,
 
 	private void initCargoPanel() {
 
-		Object[] columnNames = { "Name", "Size", "Location", "Available At" };
+		Object[] columnNames = { "Name", "Size", "Location", "Available At",
+				"Required By" };
 		cargoTableModel = new DefaultTableModel(columnNames, 0);
 		cargoTableModel.addTableModelListener(this);
 		cargoTable = new JTable(cargoTableModel) {
@@ -74,6 +75,8 @@ public class CargoInformationPanel extends JPanel implements ActionListener,
 				case 1:
 					return Integer.class;
 				case 3:
+					return Integer.class;
+				case 4:
 					return Integer.class;
 				default:
 					return String.class;
@@ -101,8 +104,9 @@ public class CargoInformationPanel extends JPanel implements ActionListener,
 		cargoTable.setRowHeight(25);
 		cargoTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		cargoTable.getTableHeader().setReorderingAllowed(false);
-		
-		comboBoxModel = new DefaultComboBoxModel<Location>(new Vector<Location>(controller.getLocations()));
+
+		comboBoxModel = new DefaultComboBoxModel<Location>(
+				new Vector<Location>(controller.getLocations()));
 
 		for (int i = 0; i < columnNames.length; i++) {
 			TableColumn col = cargoTable.getColumnModel().getColumn(i);
@@ -140,6 +144,7 @@ public class CargoInformationPanel extends JPanel implements ActionListener,
 		rowData.add(cargo.getSize());
 		rowData.add(cargo.getInitialLocation());
 		rowData.add(cargo.getAvailableIn());
+		rowData.add(cargo.getRequiredBy());
 		cargoToRowMap.put(cargo, cargoTableModel.getRowCount());
 		cargoTableModel.addRow(rowData);
 	}
@@ -172,6 +177,7 @@ public class CargoInformationPanel extends JPanel implements ActionListener,
 			rowData.setElementAt(cargo.getSize(), 1);
 			rowData.setElementAt(cargo.getInitialLocation(), 2);
 			rowData.setElementAt(cargo.getAvailableIn(), 3);
+			rowData.setElementAt(cargo.getRequiredBy(), 4);
 		}
 	}
 
@@ -201,7 +207,7 @@ public class CargoInformationPanel extends JPanel implements ActionListener,
 				removeCargo(cargo);
 			}
 		} else if (source instanceof Location) {
-			Location location = (Location)source;
+			Location location = (Location) source;
 			if (e.getActionCommand().equals(Constants.OPERATION_CREATE)) {
 				if (comboBoxModel.getIndexOf(location) == -1) {
 					comboBoxModel.addElement(location);
@@ -216,38 +222,77 @@ public class CargoInformationPanel extends JPanel implements ActionListener,
 	@Override
 	public void tableChanged(TableModelEvent e) {
 		if (e.getType() == TableModelEvent.UPDATE) {
-			int col = e.getColumn();
 			int row = e.getFirstRow();
+			int col = e.getColumn();
 			Object newObj = cargoTableModel.getValueAt(row, col);
-			if (newObj == null) {
-				return;
-			}
-			String newValue = newObj.toString();
+
 			Cargo cargo = getCargo(row);
 			switch (col) {
 			case 0:
-				if ((newValue != null) && (newValue.length() > 0)) {
-					controller.updateCargoName(cargo, newValue);
-				} else {
-					cargoTableModel.setValueAt(cargo.getName(), row, col);
+				// Cargo Name
+				if (newObj != null) {
+					String newValue = newObj.toString();
+					if (newValue.length() > 0) {
+						controller.updateCargoName(cargo, newValue);
+						break;
+					}
 				}
-				break;
+				throw new RuntimeException("Cargo name cannot be null.");
 			case 1:
-				int size = Integer.parseInt(newValue);
-				controller.updateCargoSize(cargo, size);
-				break;
-			case 2:
-				Location location = controller.getLocationByName(newValue);
-				if (location != null) {
-					controller.setCargoInitialLocation(cargo, location);
-				} else {
-					cargoTableModel.setValueAt(cargo.getInitialLocation(), row,
-							col);
+				// Cargo Size
+				if (newObj != null) {
+					String newValue = newObj.toString();
+					if (newValue.length() > 0) {
+						int size = Integer.parseInt(newValue);
+						if (size < 0) {
+							throw new RuntimeException("Cargo size cannot be negative.");
+						}
+						controller.updateCargoSize(cargo, size);
+						break;
+					}
 				}
+				throw new RuntimeException("Cargo size cannot be null.");				
+			case 2:
+				if (newObj != null) {
+					String newValue = newObj.toString();
+					if (newValue.length() > 0) {
+						Location location = controller.getLocationByName(newValue);
+						if (location != null) {
+							controller.setCargoInitialLocation(cargo, location);
+							break;
+						}
+					}
+				}
+				// If you get here there probably aren't any locations defined
 				break;
 			case 3:
-				int availableIn = Integer.parseInt(newValue);
-				controller.setCargoAvailableIn(cargo, availableIn);
+				// Cargo available in
+				if (newObj != null) {
+					String newValue = newObj.toString();
+					if (newValue.length() > 0) {
+						int availableIn = Integer.parseInt(newValue);
+						if (availableIn < 0) {
+							throw new RuntimeException("Cargo available in cannot be negative.");
+						}
+						controller.setCargoAvailableIn(cargo, availableIn);
+						break;
+					}
+				}
+				throw new RuntimeException("Cargo available in cannot be null.");	
+			case 4:
+				// Cargo required by
+				if (newObj != null) {
+					String newValue = newObj.toString();
+					if (newValue.length() > 0) {
+						int requiredBy = Integer.parseInt(newValue);
+						if (requiredBy < 0) {
+							throw new RuntimeException("Cargo required by cannot be negative.");
+						}
+						controller.setCargoRequiredBy(cargo, requiredBy);
+						break;
+					}
+				}
+				controller.removeCargoRequiredBy(cargo);
 				break;
 			}
 		}

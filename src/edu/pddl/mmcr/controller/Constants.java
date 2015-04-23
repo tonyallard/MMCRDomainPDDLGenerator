@@ -1,4 +1,4 @@
-package edu.pddl.logistics.controller;
+package edu.pddl.mmcr.controller;
 
 public class Constants {
 

@@ -1,6 +1,6 @@
-package edu.pddl.logistics.util;
+package edu.pddl.mmcr.util;
 
-import edu.pddl.logistics.model.Location;
+import edu.pddl.mmcr.model.Location;
 
 public class LocationUtil {
 

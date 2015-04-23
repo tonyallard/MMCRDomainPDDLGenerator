@@ -1,4 +1,4 @@
-package edu.pddl.logistics.ui;
+package edu.pddl.mmcr.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -22,9 +22,9 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.text.JTextComponent;
 
-import edu.pddl.logistics.controller.Constants;
-import edu.pddl.logistics.controller.Controller;
-import edu.pddl.logistics.model.Location;
+import edu.pddl.mmcr.controller.Constants;
+import edu.pddl.mmcr.controller.Controller;
+import edu.pddl.mmcr.model.Location;
 
 public class LocationInformationPanel extends JPanel implements ActionListener,
 		TableModelListener {
@@ -52,8 +52,7 @@ public class LocationInformationPanel extends JPanel implements ActionListener,
 	}
 
 	private void initLocationPanel() {
-		Object[] columnNames = { "Name", "Remaining Capacity",
-				"Current Inventoy" };
+		Object[] columnNames = { "Name", "Remaining Capacity" };
 		locationTableModel = new DefaultTableModel(columnNames, 0);
 		locationTableModel.addTableModelListener(this);
 		locationTable = new JTable(locationTableModel) {
@@ -122,7 +121,6 @@ public class LocationInformationPanel extends JPanel implements ActionListener,
 		Vector<Object> rowData = new Vector<Object>();
 		rowData.add(location.getName());
 		rowData.add(location.getRemainingCapacity());
-		rowData.add(location.getCurrentInventory());
 		locationToRowMap.put(location, locationTableModel.getRowCount());
 		locationTableModel.addRow(rowData);
 	}
@@ -153,7 +151,6 @@ public class LocationInformationPanel extends JPanel implements ActionListener,
 					.getDataVector().get(row);
 			rowData.setElementAt(location.getName(), 0);
 			rowData.setElementAt(location.getRemainingCapacity(), 1);
-			rowData.setElementAt(location.getCurrentInventory(), 2);
 		}
 	}
 
@@ -191,26 +188,31 @@ public class LocationInformationPanel extends JPanel implements ActionListener,
 			int col = e.getColumn();
 			int row = e.getFirstRow();
 			Object newObj = locationTableModel.getValueAt(row, col);
-			if (newObj == null) {
-				return;
-			}
-			String newValue = newObj.toString();
 			Location location = getLocation(row);
 			switch (col) {
 			case 0:
-				if ((newValue != null) && (newValue.length() > 0)) {
-					controller.setLocationName(location, newValue);
-				} else {
-					locationTableModel.setValueAt(location.getName(), row, col);
+				if (newObj != null) {
+					String newValue = newObj.toString();
+					if (newValue.length() > 0) {
+						controller.setLocationName(location, newValue);
+						break;
+					}
 				}
+				locationTableModel.setValueAt(location.getName(), row, col);
 				break;
 			case 1:
-				int cap = Integer.parseInt(newValue);
-				controller.setLocationRemainingCapacity(location, cap);
-				break;
-			case 2:
-				int inv = Integer.parseInt(newValue);
-				controller.setLocationCurrentInventory(location, inv);
+				if (newObj != null) {
+					String newValue = newObj.toString();
+					if (newValue.length() > 0) {
+						int cap = Integer.parseInt(newValue);
+						if (cap < 0) {
+							throw new RuntimeException("Location remaining capacity cannot be negative.");
+						}
+						controller.setLocationRemainingCapacity(location, cap);
+						break;
+					}
+				}
+				controller.removeLocationRemainingCapacity(location);
 				break;
 			}
 		}

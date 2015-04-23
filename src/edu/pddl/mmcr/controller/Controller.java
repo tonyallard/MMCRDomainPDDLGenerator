@@ -1,4 +1,4 @@
-package edu.pddl.logistics.controller;
+package edu.pddl.mmcr.controller;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -8,14 +8,14 @@ import java.util.Vector;
 
 import javax.swing.SwingUtilities;
 
-import edu.pddl.logistics.exception.PDDLModelIncompleteException;
-import edu.pddl.logistics.model.Cargo;
-import edu.pddl.logistics.model.Location;
-import edu.pddl.logistics.model.PDDLProblem;
-import edu.pddl.logistics.model.Transport;
-import edu.pddl.logistics.util.LocationUtil;
-import edu.pddl.logistics.util.PDDLReaderUtil;
-import edu.pddl.logistics.util.PDDLWriterUtil;
+import edu.pddl.mmcr.exception.PDDLModelIncompleteException;
+import edu.pddl.mmcr.model.Cargo;
+import edu.pddl.mmcr.model.Location;
+import edu.pddl.mmcr.model.PDDLProblem;
+import edu.pddl.mmcr.model.Transport;
+import edu.pddl.mmcr.util.LocationUtil;
+import edu.pddl.mmcr.util.PDDLReaderUtil;
+import edu.pddl.mmcr.util.PDDLWriterUtil;
 
 public class Controller {
 
@@ -91,7 +91,7 @@ public class Controller {
 
 	public void addNewLocaiton() {
 		Location location = new Location(
-				"L" + (Location.getNumLocations() + 1), 0, 0);
+				"L" + (Location.getNumLocations() + 1));
 		model.getLocations().add(location);
 		ActionEvent event = new ActionEvent(location,
 				ActionEvent.ACTION_PERFORMED, Constants.OPERATION_CREATE);
@@ -136,8 +136,8 @@ public class Controller {
 		}
 	}
 
-	public void setLocationRemainingCapacity(Location location, int capacity) {
-		if (location.getRemainingCapacity() != capacity) {
+	public void setLocationRemainingCapacity(Location location, Integer capacity) {
+		if (capacity.equals(location.getRemainingCapacity())) {
 			location.setRemainingCapacity(capacity);
 			ActionEvent event = new ActionEvent(location,
 					ActionEvent.ACTION_PERFORMED, Constants.OPERATION_UPDATE);
@@ -145,15 +145,13 @@ public class Controller {
 			fileChangedFlag = true;
 		}
 	}
-
-	public void setLocationCurrentInventory(Location location, int inventory) {
-		if (location.getCurrentInventory() != inventory) {
-			location.setCurrentInventory(inventory);
-			ActionEvent event = new ActionEvent(location,
-					ActionEvent.ACTION_PERFORMED, Constants.OPERATION_UPDATE);
-			notifyListeners(event);
-			fileChangedFlag = true;
-		}
+	
+	public void removeLocationRemainingCapacity(Location location) {
+		location.setRemainingCapacity(null);
+		ActionEvent event = new ActionEvent(location,
+				ActionEvent.ACTION_PERFORMED, Constants.OPERATION_UPDATE);
+		notifyListeners(event);
+		fileChangedFlag = true;
 	}
 
 	// TRANSPORT CRUD METHODS
@@ -195,9 +193,28 @@ public class Controller {
 		}
 	}
 
-	public void setTransportCurrentInventory(Transport transport, int inv) {
-		if (transport.getCurrentInventory() != inv) {
-			transport.setCurrentInventory(inv);
+	public void setTransportLoadingTime(Transport transport, Location loc, Integer loadingTime) {
+		if (!loadingTime.equals(transport.getLoadingTime(loc))) {
+			transport.setLoadingTime(loc, loadingTime);
+			ActionEvent event = new ActionEvent(transport,
+					ActionEvent.ACTION_PERFORMED, Constants.OPERATION_UPDATE);
+			notifyListeners(event);
+			fileChangedFlag = true;
+		}
+	}
+	
+	public void removeTransportLoadingTime(Transport transport,
+			Location location) {
+		transport.removeLoadingTime(location);
+		ActionEvent event = new ActionEvent(transport,
+				ActionEvent.ACTION_PERFORMED, Constants.OPERATION_UPDATE);
+		notifyListeners(event);
+		fileChangedFlag = true;	
+	}
+
+	public void setTransportUnloadingTime(Transport transport, Location loc, Integer unloadingTime) {
+		if (!unloadingTime.equals(transport.getUnloadingTime(loc))) {
+			transport.setUnloadingTime(loc, unloadingTime);
 			ActionEvent event = new ActionEvent(transport,
 					ActionEvent.ACTION_PERFORMED, Constants.OPERATION_UPDATE);
 			notifyListeners(event);
@@ -205,24 +222,13 @@ public class Controller {
 		}
 	}
 
-	public void setTransportLoadTime(Transport transport, int load) {
-		if (transport.getLoadTime() != load) {
-			transport.setLoadTime(load);
-			ActionEvent event = new ActionEvent(transport,
-					ActionEvent.ACTION_PERFORMED, Constants.OPERATION_UPDATE);
-			notifyListeners(event);
-			fileChangedFlag = true;
-		}
-	}
-
-	public void setTransportUnloadTime(Transport transport, int unload) {
-		if (transport.getUnloadTime() != unload) {
-			transport.setUnloadTime(unload);
-			ActionEvent event = new ActionEvent(transport,
-					ActionEvent.ACTION_PERFORMED, Constants.OPERATION_UPDATE);
-			notifyListeners(event);
-			fileChangedFlag = true;
-		}
+	public void removeTransportUnloadingTime(Transport transport,
+			Location location) {
+		transport.removeUnloadingTime(location);
+		ActionEvent event = new ActionEvent(transport,
+				ActionEvent.ACTION_PERFORMED, Constants.OPERATION_UPDATE);
+		notifyListeners(event);
+		fileChangedFlag = true;			
 	}
 
 	public void setTransportInitialLocation(Transport transport,
@@ -314,14 +320,32 @@ public class Controller {
 		}
 	}
 
-	public void setCargoAvailableIn(Cargo cargo, int availableIn) {
-		if (cargo.getAvailableIn() != availableIn) {
+	public void setCargoAvailableIn(Cargo cargo, Integer availableIn) {
+		if (!availableIn.equals(cargo.getAvailableIn())) {
 			cargo.setAvailableIn(availableIn);
 			ActionEvent event = new ActionEvent(cargo,
 					ActionEvent.ACTION_PERFORMED, Constants.OPERATION_UPDATE);
 			notifyListeners(event);
 			fileChangedFlag = true;
 		}
+	}
+
+	public void setCargoRequiredBy(Cargo cargo, Integer requiredBy) {
+		if (!requiredBy.equals(cargo.getRequiredBy())) {
+			cargo.setRequiredBy(requiredBy);
+			ActionEvent event = new ActionEvent(cargo,
+					ActionEvent.ACTION_PERFORMED, Constants.OPERATION_UPDATE);
+			notifyListeners(event);
+			fileChangedFlag = true;
+		}
+	}
+
+	public void removeCargoRequiredBy(Cargo cargo) {
+		cargo.setRequiredBy(null);
+		ActionEvent event = new ActionEvent(cargo,
+				ActionEvent.ACTION_PERFORMED, Constants.OPERATION_UPDATE);
+		notifyListeners(event);
+		fileChangedFlag = true;		
 	}
 	
 	public void invokeCreationEvents() {

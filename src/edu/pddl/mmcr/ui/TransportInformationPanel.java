@@ -1,4 +1,4 @@
-package edu.pddl.logistics.ui;
+package edu.pddl.mmcr.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -20,11 +20,16 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableColumn;
 import javax.swing.text.JTextComponent;
 
-import edu.pddl.logistics.controller.Constants;
-import edu.pddl.logistics.controller.Controller;
-import edu.pddl.logistics.model.Location;
-import edu.pddl.logistics.model.Transport;
+import edu.pddl.mmcr.controller.Constants;
+import edu.pddl.mmcr.controller.Controller;
+import edu.pddl.mmcr.model.Location;
+import edu.pddl.mmcr.model.Transport;
 
+/**
+ * This class is the root Transport UI Class
+ * @author tony
+ *
+ */
 public class TransportInformationPanel extends JPanel implements
 		TableModelListener, ActionListener {
 
@@ -32,7 +37,7 @@ public class TransportInformationPanel extends JPanel implements
 	 * 
 	 */
 	private static final long serialVersionUID = 8878364677692218340L;
-	private static final int LOCATION_COLUMN_INDEX = 5;
+	private static final int LOCATION_COLUMN_INDEX = 1;
 
 	private Transport transport = null;
 	private Controller controller = null;
@@ -40,6 +45,9 @@ public class TransportInformationPanel extends JPanel implements
 	private DefaultTableModel transportTableModel = null;
 	private JTable transportTable = null;
 	private DefaultComboBoxModel<Location> comboBoxModel = null;
+	
+	private TransportRoutePanel transportRoutePanel = null;
+	private TransportLoadUnloadPanel transportLoadUnloadPanel = null;
 
 	public TransportInformationPanel(Transport transport, Controller controller) {
 		this.transport = transport;
@@ -47,17 +55,15 @@ public class TransportInformationPanel extends JPanel implements
 		this.controller.addActionListener(this);
 		setLayout(new BorderLayout());
 		initTransportPanel();
+		initOtherTransportPanels();
 	}
 
 	private void initTransportPanel() {
-		Object[] columnNames = { "Name", "Remaining Capacity",
-				"Current Inventoy", "Load Time", "Unload Time",
-				"Initial Location", "Available At" };
+		Object[] columnNames = { "Name", "Initial Location",
+				"Remaining Capacity", "Available At" };
 		Object[][] data = { { transport.getName(),
-				transport.getRemainingCapacity(),
-				transport.getCurrentInventory(), transport.getLoadTime(),
-				transport.getUnloadTime(), transport.getInitialLocation(),
-				transport.getAvailableIn() } };
+				transport.getInitialLocation(),
+				transport.getRemainingCapacity(), transport.getAvailableIn() } };
 		transportTableModel = new DefaultTableModel(data, columnNames);
 		transportTableModel.addTableModelListener(this);
 		transportTable = new JTable(transportTableModel) {
@@ -74,7 +80,7 @@ public class TransportInformationPanel extends JPanel implements
 				switch (column) {
 				case 0:
 					return String.class;
-				case 5:
+				case 1:
 					return String.class;
 				default:
 					return Integer.class;
@@ -114,9 +120,20 @@ public class TransportInformationPanel extends JPanel implements
 				col.setCellEditor(new DefaultCellEditor(locCombo));
 			}
 		}
+		
+		JPanel northPanel = new JPanel(new BorderLayout());
+		northPanel.add(transportTable.getTableHeader(), BorderLayout.NORTH);
+		northPanel.add(transportTable, BorderLayout.CENTER);
+		add(northPanel, BorderLayout.NORTH);
+	}
 
-		add(transportTable.getTableHeader(), BorderLayout.NORTH);
-		add(transportTable, BorderLayout.CENTER);
+	private void initOtherTransportPanels() {
+		JPanel centerPanel = new JPanel(new BorderLayout());
+		this.transportRoutePanel = new TransportRoutePanel(transport, controller);
+		this.transportLoadUnloadPanel = new TransportLoadUnloadPanel(transport, controller);
+		centerPanel.add(transportRoutePanel, BorderLayout.CENTER);
+		centerPanel.add(transportLoadUnloadPanel, BorderLayout.EAST);
+		add(centerPanel, BorderLayout.CENTER);
 	}
 
 	private void updateTransport(Transport transport) {
@@ -124,12 +141,9 @@ public class TransportInformationPanel extends JPanel implements
 		Vector<Object> rowData = (Vector<Object>) transportTableModel
 				.getDataVector().get(0);
 		rowData.setElementAt(transport.getName(), 0);
-		rowData.setElementAt(transport.getRemainingCapacity(), 1);
-		rowData.setElementAt(transport.getCurrentInventory(), 2);
-		rowData.setElementAt(transport.getLoadTime(), 3);
-		rowData.setElementAt(transport.getUnloadTime(), 4);
-		rowData.setElementAt(transport.getInitialLocation(), 5);
-		rowData.setElementAt(transport.getAvailableIn(), 6);
+		rowData.setElementAt(transport.getInitialLocation(), 1);
+		rowData.setElementAt(transport.getRemainingCapacity(), 2);
+		rowData.setElementAt(transport.getAvailableIn(), 3);
 	}
 
 	@Override
@@ -137,47 +151,58 @@ public class TransportInformationPanel extends JPanel implements
 		if (e.getType() == TableModelEvent.UPDATE) {
 			int col = e.getColumn();
 			Object newObj = transportTableModel.getValueAt(0, col);
-			if (newObj == null) {
-				return;
+			if ((newObj == null) || (newObj.toString().length() <= 0)) {
+				
 			}
-			String newValue = newObj.toString();
 			switch (col) {
 			case 0:
-				if ((newValue != null) && (newValue.length() > 0)) {
-					controller.setTransportName(transport, newValue);
-				} else {
-					transportTableModel.setValueAt(transport.getName(), 0, col);
+				if (newObj != null) {
+					String newValue = newObj.toString();
+					if (newValue.length() > 0) {
+						controller.setTransportName(transport, newValue);
+						break;
+					}
 				}
-				break;
+				throw new RuntimeException("Transport name cannot be null.");
 			case 1:
-				int cap = Integer.parseInt(newValue);
-				controller.setTransportRemainingCapacity(transport, cap);
+				if (newObj != null) {
+					String newValue = newObj.toString();
+					if (newValue.length() > 0) {
+						Location location = controller.getLocationByName(newValue);
+						if (location != null) {
+							controller.setTransportInitialLocation(transport, location);
+							break;
+						}
+					}
+				}
+				// If you get here there probably aren't any locations defined
 				break;
 			case 2:
-				int inv = Integer.parseInt(newValue);
-				controller.setTransportCurrentInventory(transport, inv);
-				break;
-			case 3:
-				int load = Integer.parseInt(newValue);
-				controller.setTransportLoadTime(transport, load);
-				break;
-			case 4:
-				int unload = Integer.parseInt(newValue);
-				controller.setTransportUnloadTime(transport, unload);
-				break;
-			case 5:
-				Location location = controller.getLocationByName(newValue);
-				if (location != null) {
-					controller.setTransportInitialLocation(transport, location);
-				} else {
-					transportTableModel.setValueAt(
-							transport.getInitialLocation(), 0, col);
+				if (newObj != null) {
+					String newValue = newObj.toString();
+					if (newValue.length() > 0) {
+						int cap = Integer.parseInt(newValue);
+						if (cap < 0) {
+							throw new RuntimeException("Transport capacity cannot be negative.");
+						}
+						controller.setTransportRemainingCapacity(transport, cap);
+						break;
+					}
 				}
-				break;
-			case 6:
-				int availableIn = Integer.parseInt(newValue);
-				controller.setTransportAvailableIn(transport, availableIn);
-				break;
+				throw new RuntimeException("Transport capacity cannot be null.");
+			case 3:
+				if (newObj != null) {
+					String newValue = newObj.toString();
+					if (newValue.length() > 0) {
+						int availableIn = Integer.parseInt(newValue);
+						if (availableIn < 0) {
+							throw new RuntimeException("Transport available in cannot be negative.");
+						}
+						controller.setTransportAvailableIn(transport, availableIn);
+						break;
+					}
+				}
+				throw new RuntimeException("Transport available in cannot be null.");
 			}
 		}
 	}

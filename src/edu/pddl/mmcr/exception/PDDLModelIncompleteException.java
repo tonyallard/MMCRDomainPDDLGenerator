@@ -1,4 +1,4 @@
-package edu.pddl.logistics.exception;
+package edu.pddl.mmcr.exception;
 
 public class PDDLModelIncompleteException extends Exception {
 

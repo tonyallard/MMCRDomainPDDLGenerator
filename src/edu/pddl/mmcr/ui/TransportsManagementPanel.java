@@ -1,4 +1,4 @@
-package edu.pddl.logistics.ui;
+package edu.pddl.mmcr.ui;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -12,9 +12,9 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
-import edu.pddl.logistics.controller.Constants;
-import edu.pddl.logistics.controller.Controller;
-import edu.pddl.logistics.model.Transport;
+import edu.pddl.mmcr.controller.Constants;
+import edu.pddl.mmcr.controller.Controller;
+import edu.pddl.mmcr.model.Transport;
 
 public class TransportsManagementPanel extends JPanel implements ActionListener {
 
@@ -63,7 +63,7 @@ public class TransportsManagementPanel extends JPanel implements ActionListener 
 	}
 
 	private void addTransport(Transport transport) {
-		TransportAndRouteInformationPanel tptPanel = new TransportAndRouteInformationPanel(
+		TransportInformationPanel tptPanel = new TransportInformationPanel(
 				transport, controller);
 		transportToTabIndexMap.put(transport, tabbedPane.getTabCount());
 		tabbedPane.addTab(transport.getName(), tptPanel);

@@ -1,4 +1,4 @@
-package edu.pddl.logistics.util;
+package edu.pddl.mmcr.util;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -10,13 +10,13 @@ import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Map;
 
-import edu.pddl.logistics.exception.PDDLModelIncompleteException;
-import edu.pddl.logistics.model.Cargo;
-import edu.pddl.logistics.model.Location;
-import edu.pddl.logistics.model.Transport;
+import edu.pddl.mmcr.exception.PDDLModelIncompleteException;
+import edu.pddl.mmcr.model.Cargo;
+import edu.pddl.mmcr.model.Location;
+import edu.pddl.mmcr.model.Transport;
 
 public class PDDLWriterUtil {
-	private static final String DOMAIN_FILENAME = "LogisticsDomain.pddl";
+	private static final String DOMAIN_FILENAME = "MMCR.pddl";
 
 	private PDDLWriterUtil() {
 	}
@@ -29,7 +29,7 @@ public class PDDLWriterUtil {
 		// HEADER
 		bw.write("(define (problem " + problemName + ")");
 		bw.newLine();
-		bw.write("\t(:domain logistics)");
+		bw.write("\t(:domain multi-modal-cargo-routing)");
 		bw.newLine();
 		// OBJECT DEFINITION
 		bw.write("\t(:objects");
@@ -39,7 +39,7 @@ public class PDDLWriterUtil {
 		for (Transport tpt : transports) {
 			transportNames += tpt.getName() + " ";
 		}
-		bw.write("\t\t" + transportNames + " - TRANSPORT");
+		bw.write("\t\t" + transportNames + " - VEHICLE");
 		bw.newLine();
 		// define locations
 		String locationNames = "";
@@ -63,7 +63,7 @@ public class PDDLWriterUtil {
 		for (Transport tpt : transports) {
 			if (tpt.getInitialLocation() == null) {
 				bw.close();
-				throw new PDDLModelIncompleteException("Transport "
+				throw new PDDLModelIncompleteException("Vehicle "
 						+ tpt.getName() + " does not have an initial location.");
 			}
 			bw.write("\t\t(at " + tpt.getName() + " "
@@ -82,7 +82,7 @@ public class PDDLWriterUtil {
 					+ cargo.getInitialLocation().getName() + ")");
 			bw.newLine();
 		}
-		// Transports Ready for Loading
+		// Transport Ready for Loading
 		for (Transport tpt : transports) {
 			bw.write("\t\t(ready-loading " + tpt.getName() + ")");
 			bw.newLine();
@@ -95,21 +95,12 @@ public class PDDLWriterUtil {
 		}
 		// Location Capacity
 		for (Location loc : locations) {
-			bw.write("\t\t(= (remaining-capacity " + loc.getName() + ") "
-					+ loc.getRemainingCapacity() + ")");
-			bw.newLine();
-		}
-		// Transport Inventory
-		for (Transport tpt : transports) {
-			bw.write("\t\t(= (current-inventory " + tpt.getName() + ") "
-					+ tpt.getCurrentInventory() + ")");
-			bw.newLine();
-		}
-		// Location Inventory
-		for (Location loc : locations) {
-			bw.write("\t\t(= (current-inventory " + loc.getName() + ") "
-					+ loc.getCurrentInventory() + ")");
-			bw.newLine();
+			// If null then location has no capacity - omit from model
+			if (loc.getRemainingCapacity() != null) {
+				bw.write("\t\t(= (remaining-capacity " + loc.getName() + ") "
+						+ loc.getRemainingCapacity() + ")");
+				bw.newLine();
+			}
 		}
 		// Transport Routes
 		for (Transport tpt : transports) {
@@ -134,31 +125,56 @@ public class PDDLWriterUtil {
 		}
 		// Transport Load Times
 		for (Transport tpt : transports) {
-			bw.write("\t\t(= (load-time " + tpt.getName() + ") "
-					+ tpt.getLoadTime() + ")");
-			bw.newLine();
+			for (Location loc : tpt.getLoadingTimes().keySet()) {
+				Integer loadingTime = tpt.getLoadingTime(loc);
+				bw.write("\t\t(= (load-time " + tpt.getName() + " "
+						+ loc.getName() + ") " + loadingTime + ")");
+				bw.newLine();
+			}
 		}
 		// Transport Unload Times
 		for (Transport tpt : transports) {
-			bw.write("\t\t(= (unload-time " + tpt.getName() + ") "
-					+ tpt.getUnloadTime() + ")");
-			bw.newLine();
+			for (Location loc : tpt.getUnloadingTimes().keySet()) {
+				Integer unloadingTime = tpt.getUnloadingTime(loc);
+				bw.write("\t\t(= (unload-time " + tpt.getName() + " "
+						+ loc.getName() + ") " + unloadingTime + ")");
+				bw.newLine();
+			}
 		}
 		// Transport Available Times
 		for (Transport tpt : transports) {
-			bw.write("\t\t(not (available " + tpt.getName() + "))");
-			bw.newLine();
-			bw.write("\t\t(at " + tpt.getAvailableIn() + " (available "
-					+ tpt.getName() + "))");
-			bw.newLine();
+			// If no timed availability omit TIL
+			if (tpt.getAvailableIn() == 0) {
+				bw.write("\t\t(available " + tpt.getName() + ")");
+				bw.newLine();
+			} else { // otherwise add it
+				bw.write("\t\t(not (available " + tpt.getName() + "))");
+				bw.newLine();
+				bw.write("\t\t(at " + tpt.getAvailableIn() + " (available "
+						+ tpt.getName() + "))");
+				bw.newLine();
+			}
 		}
-		// Cargo Available Times
+
 		for (Cargo cargo : cargos) {
-			bw.write("\t\t(not (available " + cargo.getName() + "))");
-			bw.newLine();
-			bw.write("\t\t(at " + cargo.getAvailableIn() + " (available "
-					+ cargo.getName() + "))");
-			bw.newLine();
+			// Cargo Available In Times
+			// If no timed availability omit TIL
+			if (cargo.getAvailableIn() == 0) {
+				bw.write("\t\t(available " + cargo.getName() + ")");
+				bw.newLine();
+			} else { // otherwise add it
+				bw.write("\t\t(not (available " + cargo.getName() + "))");
+				bw.newLine();
+				bw.write("\t\t(at " + cargo.getAvailableIn() + " (available "
+						+ cargo.getName() + "))");
+				bw.newLine();
+			}
+			// Add required by if ... required
+			if (cargo.getRequiredBy() != null) {
+				bw.write("\t\t(at " + cargo.getRequiredBy()
+						+ " (not (available " + cargo.getName() + ")))");
+				bw.newLine();
+			}
 		}
 		bw.write("\t)");
 		bw.newLine();

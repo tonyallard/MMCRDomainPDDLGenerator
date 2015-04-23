@@ -1,4 +1,4 @@
-package edu.pddl.logistics.ui;
+package edu.pddl.mmcr.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -8,26 +8,30 @@ import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Vector;
 
-import javax.swing.DefaultCellEditor;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
-import javax.swing.event.CellEditorListener;
-import javax.swing.event.ChangeEvent;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableColumn;
 import javax.swing.text.JTextComponent;
 
-import edu.pddl.logistics.controller.Constants;
-import edu.pddl.logistics.controller.Controller;
-import edu.pddl.logistics.model.Location;
-import edu.pddl.logistics.model.Transport;
+import edu.pddl.mmcr.controller.Constants;
+import edu.pddl.mmcr.controller.Controller;
+import edu.pddl.mmcr.model.Location;
+import edu.pddl.mmcr.model.Transport;
 
-public class TransportAndRouteInformationPanel extends JPanel implements
-		ActionListener, CellEditorListener {
+/**
+ * 
+ * @author tony
+ *
+ */
+public class TransportRoutePanel extends JPanel implements ActionListener,
+		TableModelListener {
 	/**
 	 * 
 	 */
@@ -37,14 +41,12 @@ public class TransportAndRouteInformationPanel extends JPanel implements
 	private Controller controller = null;
 
 	private JTable routeTable = null;
-	private TransportInformationPanel tPanel = null;
 	private RouteTableModel routeTableModel = null;
 
-	private Map<Location, Integer> locationToRowMap = null; //Origins
-	private Map<Location, Integer> locationToColumnMap = null; //Destinations
+	private Map<Location, Integer> locationToRowMap = null; // Origins
+	private Map<Location, Integer> locationToColumnMap = null; // Destinations
 
-	public TransportAndRouteInformationPanel(Transport transport,
-			Controller controller) {
+	public TransportRoutePanel(Transport transport, Controller controller) {
 		this.transport = transport;
 		this.controller = controller;
 		this.controller.addActionListener(this);
@@ -52,7 +54,6 @@ public class TransportAndRouteInformationPanel extends JPanel implements
 		this.locationToColumnMap = new IdentityHashMap<Location, Integer>();
 		setLayout(new BorderLayout());
 		initRouteTable();
-		initTransportDataPanel();
 		initLocations();
 		initRoutes();
 	}
@@ -73,11 +74,7 @@ public class TransportAndRouteInformationPanel extends JPanel implements
 				}
 			}
 		}
-		
-	}
 
-	public Transport getTransport() {
-		return transport;
 	}
 
 	private void initLocations() {
@@ -87,15 +84,11 @@ public class TransportAndRouteInformationPanel extends JPanel implements
 		}
 	}
 
-	private void initTransportDataPanel() {
-		tPanel = new TransportInformationPanel(transport, controller);
-		add(tPanel, BorderLayout.NORTH);
-	}
-
 	private void initRouteTable() {
 		// init center panel
 		Object[] columnNames = { "Origin \u25BC / Destination \u25BA" };
 		routeTableModel = new RouteTableModel(columnNames, 0);
+		routeTableModel.addTableModelListener(this);
 		routeTable = new JTable(routeTableModel) {
 
 			private static final long serialVersionUID = 1L;
@@ -136,11 +129,10 @@ public class TransportAndRouteInformationPanel extends JPanel implements
 		routeTable.setRowHeight(25);
 		routeTable.setDefaultRenderer(Integer.class,
 				new TransportLocationTableCellRenderer());
-		routeTable.getDefaultEditor(Integer.class).addCellEditorListener(this);
 		routeTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		routeTable.getTableHeader().setReorderingAllowed(false);
 
-		JLabel routesLabel = new JLabel("Transport Travel Times:");
+		JLabel routesLabel = new JLabel("Travel Times:");
 
 		JPanel centerPanel = new JPanel(new BorderLayout());
 		centerPanel.add(routesLabel, BorderLayout.NORTH);
@@ -149,7 +141,7 @@ public class TransportAndRouteInformationPanel extends JPanel implements
 		add(centerPanel, BorderLayout.CENTER);
 	}
 
-	public void addLocation(Location location) {
+	private void addLocation(Location location) {
 		Vector<Object> columnData = new Vector<Object>();
 		locationToColumnMap.put(location, routeTableModel.getColumnCount());
 		routeTableModel.addColumn(location.getName(), columnData);
@@ -159,7 +151,7 @@ public class TransportAndRouteInformationPanel extends JPanel implements
 		routeTableModel.addRow(rowData);
 	}
 
-	public void updateLocation(Location location) {
+	private void updateLocation(Location location) {
 		Integer row = locationToRowMap.get(location);
 		Integer col = locationToColumnMap.get(location);
 		if (row != null) {
@@ -174,7 +166,7 @@ public class TransportAndRouteInformationPanel extends JPanel implements
 		repaint();
 	}
 
-	public void removeLocation(Location location) {
+	private void removeLocation(Location location) {
 		Integer row = locationToRowMap.remove(location);
 		Integer col = locationToColumnMap.remove(location);
 		if (col != null) {
@@ -207,34 +199,28 @@ public class TransportAndRouteInformationPanel extends JPanel implements
 	}
 
 	@Override
-	public void editingStopped(ChangeEvent e) {
-		Object source = e.getSource();
-		DefaultCellEditor s = (DefaultCellEditor) source;
-		String newValue = null;
-		if (s.getCellEditorValue() != null) {
-			newValue = s.getCellEditorValue().toString();
-		}
-		int row = routeTable.getSelectedRow();
-		int col = routeTable.getSelectedColumn();
-		Location origin = getLocationFromRow(row);
-		Location destination = getLocationFromColumn(col);
-
-		if ((newValue != null) && (newValue.length() > 0)) {
-			try {
-				Integer travelTime = Integer.parseInt(newValue);
-				controller.setTransportRoute(transport, origin, destination,
-						travelTime);
-			} catch (NumberFormatException exp) {
+	public void tableChanged(TableModelEvent e) {
+		if (e.getType() == TableModelEvent.UPDATE) {
+			int row = e.getFirstRow();
+			int col = e.getColumn();
+			if ((row < 0) || (col < 0)) {
 				return;
 			}
-		} else {
+			Object newObj = routeTableModel.getValueAt(row, col);
+			Location origin = getLocationFromRow(row);
+			Location destination = getLocationFromColumn(col);
+			if (newObj != null) {
+				String newValue = newObj.toString();
+				int travelTime = Integer.parseInt(newValue);
+				if (travelTime < 0) {
+					throw new RuntimeException("Transport route travel time cannot be negative.");
+				}
+				controller.setTransportRoute(transport, origin,
+						destination, travelTime);
+				return;
+			}
 			controller.removeTransportRoute(transport, origin, destination);
 		}
-	}
-
-	@Override
-	public void editingCanceled(ChangeEvent e) {
-
 	}
 
 	@Override

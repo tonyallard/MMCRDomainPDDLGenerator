@@ -1,4 +1,4 @@
-package edu.pddl.logistics.util;
+package edu.pddl.mmcr.util;
 
 import java.io.File;
 import java.io.IOException;
@@ -6,10 +6,10 @@ import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.pddl.logistics.model.Cargo;
-import edu.pddl.logistics.model.Location;
-import edu.pddl.logistics.model.PDDLProblem;
-import edu.pddl.logistics.model.Transport;
+import edu.pddl.mmcr.model.Cargo;
+import edu.pddl.mmcr.model.Location;
+import edu.pddl.mmcr.model.PDDLProblem;
+import edu.pddl.mmcr.model.Transport;
 
 /**
  * This is a really brittle reader. Just needed to get something working to
@@ -20,17 +20,18 @@ import edu.pddl.logistics.model.Transport;
  */
 public class PDDLReaderUtil {
 
-	private static final String PROBLEM_NAME_DELIMETER = "problem ";
+	private static final String PROBLEM_NAME_LINE_DELIMETER = ".*\\((\\s*)?problem.*";
+	private static final String PROBLEM_NAME_DELIMETER = ".*\\((\\s*)?problem(\\s*)";
 	private static final String LOCATION_DEFINITION_DELIMETER = "- LOCATION";
-	private static final String TRANSPORT_DEFINITION_DELIMETER = "- TRANSPORT";
+	private static final String TRANSPORT_DEFINITION_DELIMETER = "- VEHICLE";
 	private static final String CARGO_DEFINITION_DELIMETER = "- CARGO";
 	private static final String CAPACITY_DELIMETER = "\t\t(= (remaining-capacity ";
-	private static final String INVENTORY_DELIMETER = "\t\t(= (current-inventory ";
 	private static final String LOCATION_DELIMETER = "\t\t(at ";
 	private static final String ROUTES_DELIMETER = "\t\t(= (travel-time ";
 	private static final String LOAD_DELIMETER = "\t\t(= (load-time ";
 	private static final String UNLOAD_DELIMETER = "\t\t(= (unload-time ";
 	private static final String AVAILABLE_DELIMETER = ".+\\(at \\d+ \\(available.+\\)\\)";
+	private static final String REQUIRED_BY_DELIMETER = ".*\\(at \\d+ \\(not \\(available.+\\)\\)\\)";
 	private static final String SIZE_DELIMETER = "\t\t(= (size ";
 
 	public static PDDLProblem readProblem(File file) throws IOException {
@@ -118,6 +119,21 @@ public class PDDLReaderUtil {
 			}
 			line = reader.readLine();
 		}
+		// Find Required By Time
+		reader.seek(0);
+		line = reader.readLine();
+		while (line != null) {
+			if (line.matches(REQUIRED_BY_DELIMETER)) {
+				String[] parts = line.split(" ");
+				String name = parts[4].replace(')', ' ').trim();
+				String available = parts[1].trim();
+				Cargo cargo = CargoUtil.getCargoByName(name, cargos);
+				if (cargo != null) {
+					cargo.setRequiredBy(Integer.parseInt(available));
+				}
+			}
+			line = reader.readLine();
+		}
 
 		return cargos;
 	}
@@ -134,7 +150,7 @@ public class PDDLReaderUtil {
 						.trim();
 				String[] tpts = names.split(" ");
 				for (String tpt : tpts) {
-					Transport transport = new Transport(tpt, 0, 0, 0, 0, 0);
+					Transport transport = new Transport(tpt, 0, 0);
 					transports.add(transport);
 				}
 			}
@@ -153,23 +169,6 @@ public class PDDLReaderUtil {
 						transports);
 				if (transport != null) {
 					transport.setRemainingCapacity(Integer.parseInt(cap));
-				}
-			}
-			line = reader.readLine();
-		}
-		// Find Current Inventory Capacity
-		reader.seek(0);
-		line = reader.readLine();
-		while (line != null) {
-			if (line.contains(INVENTORY_DELIMETER)) {
-				String data = line.substring(INVENTORY_DELIMETER.length());
-				String[] parts = data.split("\\)");
-				String name = parts[0].trim();
-				String inv = parts[1].trim();
-				Transport transport = TransportUtil.getTransportByName(name,
-						transports);
-				if (transport != null) {
-					transport.setCurrentInventory(Integer.parseInt(inv));
 				}
 			}
 			line = reader.readLine();
@@ -226,12 +225,15 @@ public class PDDLReaderUtil {
 			if (line.contains(LOAD_DELIMETER)) {
 				String data = line.substring(LOAD_DELIMETER.length());
 				String[] parts = data.split(" ");
-				String name = parts[0].replace(')', ' ').trim();
-				String load = parts[1].replace(')', ' ').trim();
-				Transport transport = TransportUtil.getTransportByName(name,
-						transports);
+				String tpt_name = parts[0].replace(')', ' ').trim();
+				String loc_name = parts[1].replace(')', ' ').trim();
+				String load = parts[2].replace(')', ' ').trim();
+				Transport transport = TransportUtil.getTransportByName(
+						tpt_name, transports);
+				Location loc = LocationUtil.getLocationByName(loc_name,
+						locations);
 				if (transport != null) {
-					transport.setLoadTime(Integer.parseInt(load));
+					transport.setLoadingTime(loc, Integer.parseInt(load));
 				}
 			}
 			line = reader.readLine();
@@ -243,12 +245,15 @@ public class PDDLReaderUtil {
 			if (line.contains(UNLOAD_DELIMETER)) {
 				String data = line.substring(UNLOAD_DELIMETER.length());
 				String[] parts = data.split(" ");
-				String name = parts[0].replace(')', ' ').trim();
-				String unload = parts[1].replace(')', ' ').trim();
-				Transport transport = TransportUtil.getTransportByName(name,
-						transports);
+				String tpt_name = parts[0].replace(')', ' ').trim();
+				String loc_name = parts[1].replace(')', ' ').trim();
+				String unload = parts[2].replace(')', ' ').trim();
+				Transport transport = TransportUtil.getTransportByName(
+						tpt_name, transports);
+				Location loc = LocationUtil.getLocationByName(loc_name,
+						locations);
 				if (transport != null) {
-					transport.setUnloadTime(Integer.parseInt(unload));
+					transport.setUnloadingTime(loc, Integer.parseInt(unload));
 				}
 			}
 			line = reader.readLine();
@@ -285,7 +290,7 @@ public class PDDLReaderUtil {
 						.trim();
 				String[] locs = names.split(" ");
 				for (String loc : locs) {
-					Location location = new Location(loc, 0, 0);
+					Location location = new Location(loc);
 					locations.add(location);
 				}
 			}
@@ -304,23 +309,6 @@ public class PDDLReaderUtil {
 						locations);
 				if (location != null) {
 					location.setRemainingCapacity(Integer.parseInt(cap));
-				}
-			}
-			line = reader.readLine();
-		}
-		// Find Current Inventory Capacity For Locations
-		reader.seek(0);
-		line = reader.readLine();
-		while (line != null) {
-			if (line.contains(INVENTORY_DELIMETER)) {
-				String data = line.substring(INVENTORY_DELIMETER.length());
-				String[] parts = data.split("\\)");
-				String name = parts[0].trim();
-				String inv = parts[1].trim();
-				Location location = LocationUtil.getLocationByName(name,
-						locations);
-				if (location != null) {
-					location.setCurrentInventory(Integer.parseInt(inv));
 				}
 			}
 			line = reader.readLine();
@@ -349,10 +337,16 @@ public class PDDLReaderUtil {
 			throws IOException {
 		reader.seek(0);
 		String line = reader.readLine();
-		int first = line.indexOf('(', 1);
-		int last = line.indexOf(')');
-		line = line.substring(first + 1, last);
-		return line.split(PROBLEM_NAME_DELIMETER)[1];
+		while (line != null) {
+			if (line.matches(PROBLEM_NAME_LINE_DELIMETER)) {
+				String [] parts = line.split(PROBLEM_NAME_DELIMETER);
+				int last = parts[1].indexOf(')');
+				line = parts[1].substring(0, last);
+				return line;
+			}
+			line = reader.readLine();
+		}
+		return null;
 	}
 
 }

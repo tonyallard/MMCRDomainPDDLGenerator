@@ -1,4 +1,4 @@
-package edu.pddl.logistics.ui;
+package edu.pddl.mmcr.ui;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -27,9 +27,9 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import edu.pddl.logistics.controller.Controller;
-import edu.pddl.logistics.exception.PDDLModelIncompleteException;
-import edu.pddl.logistics.util.PDDLWriterUtil;
+import edu.pddl.mmcr.controller.Controller;
+import edu.pddl.mmcr.exception.PDDLModelIncompleteException;
+import edu.pddl.mmcr.util.PDDLWriterUtil;
 
 public class MainGUI extends JFrame implements ActionListener, FocusListener {
 
@@ -38,8 +38,6 @@ public class MainGUI extends JFrame implements ActionListener, FocusListener {
 	 */
 	private static final long serialVersionUID = 6534047709842754324L;
 
-	private TransportsManagementPanel tPanel = null;
-	private CargoInformationPanel cPanel = null;
 	private JMenuItem newProblem = null;
 	private JMenuItem saveProblem = null;
 	private JMenuItem saveDomain = null;
@@ -64,7 +62,7 @@ public class MainGUI extends JFrame implements ActionListener, FocusListener {
 				}
 			}
 		});
-		setTitle("Logistics Domain PDDL Builder");
+		setTitle("MMCR Domain PDDL Builder");
 		UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		fileChooser = new JFileChooser();
 
@@ -135,7 +133,7 @@ public class MainGUI extends JFrame implements ActionListener, FocusListener {
 	}
 
 	private void initSouthPanel() {
-		cPanel = new CargoInformationPanel(controller);
+		CargoInformationPanel cPanel = new CargoInformationPanel(controller);
 		LocationInformationPanel lPanel = new LocationInformationPanel(
 				controller);
 		JPanel eastPanel = new JPanel(new GridLayout(1, 2));
@@ -145,7 +143,7 @@ public class MainGUI extends JFrame implements ActionListener, FocusListener {
 	}
 
 	private void initMainPanel() {
-		tPanel = new TransportsManagementPanel(controller);
+		TransportsManagementPanel tPanel = new TransportsManagementPanel(controller);
 		add(tPanel, BorderLayout.CENTER);
 	}
 
@@ -188,7 +186,7 @@ public class MainGUI extends JFrame implements ActionListener, FocusListener {
 		fileChooser.setMultiSelectionEnabled(false);
 		fileChooser.setFileFilter(new FileNameExtensionFilter("PDDL Files",
 				"pddl"));
-		fileChooser.setSelectedFile(new File("LogisticsDomain.pddl"));
+		fileChooser.setSelectedFile(new File("MMCRDomain.pddl"));
 		int returnValue = fileChooser.showSaveDialog(this);
 		if (returnValue == JFileChooser.APPROVE_OPTION) {
 			File selectedFile = fileChooser.getSelectedFile();

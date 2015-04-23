@@ -1,4 +1,4 @@
-package edu.pddl.logistics.model;
+package edu.pddl.mmcr.model;
 
 public class Route {
 	private Transport transport = null;

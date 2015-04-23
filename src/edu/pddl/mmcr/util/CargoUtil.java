@@ -1,6 +1,6 @@
-package edu.pddl.logistics.util;
+package edu.pddl.mmcr.util;
 
-import edu.pddl.logistics.model.Cargo;
+import edu.pddl.mmcr.model.Cargo;
 
 public class CargoUtil {
 

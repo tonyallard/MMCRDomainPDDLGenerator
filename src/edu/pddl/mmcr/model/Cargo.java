@@ -1,4 +1,4 @@
-package edu.pddl.logistics.model;
+package edu.pddl.mmcr.model;
 
 public class Cargo {
 
@@ -8,6 +8,7 @@ public class Cargo {
 	private int size = 0;
 	private Location initialLocation = null;
 	private int availableIn = 0;
+	private Integer requiredBy = null;
 
 	public Cargo(String name, int size, int availableIn) {
 		super();
@@ -51,5 +52,13 @@ public class Cargo {
 
 	public void setAvailableIn(int availableIn) {
 		this.availableIn = availableIn;
+	}
+
+	public Integer getRequiredBy() {
+		return requiredBy;
+	}
+
+	public void setRequiredBy(Integer requiredBy) {
+		this.requiredBy = requiredBy;
 	}
 }

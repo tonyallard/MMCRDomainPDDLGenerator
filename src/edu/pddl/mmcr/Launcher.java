@@ -1,8 +1,8 @@
-package edu.pddl.logistics;
+package edu.pddl.mmcr;
 
 import javax.swing.UnsupportedLookAndFeelException;
 
-import edu.pddl.logistics.ui.MainGUI;
+import edu.pddl.mmcr.ui.MainGUI;
 
 public class Launcher {
 	private Launcher()
