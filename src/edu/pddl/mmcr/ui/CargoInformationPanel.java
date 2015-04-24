@@ -75,9 +75,9 @@ public class CargoInformationPanel extends JPanel implements ActionListener,
 				switch (column) {
 				case 1:
 					return Integer.class;
-				case 3:
-					return Integer.class;
 				case 4:
+					return Integer.class;
+				case 5:
 					return Integer.class;
 				default:
 					return String.class;

@@ -33,6 +33,7 @@ public class PDDLReaderUtil {
 	private static final String AVAILABLE_DELIMETER = ".+\\(at \\d+ \\(available.+\\)\\)";
 	private static final String REQUIRED_BY_DELIMETER = ".*\\(at \\d+ \\(not \\(available.+\\)\\)\\)";
 	private static final String SIZE_DELIMETER = "\t\t(= (size ";
+	private static final String GOAL_LOCATION_DELIMETER = "\t\t\t(at ";
 
 	public static PDDLProblem readProblem(File file) throws IOException {
 		PDDLProblem model = new PDDLProblem();
@@ -86,7 +87,7 @@ public class PDDLReaderUtil {
 			}
 			line = reader.readLine();
 		}
-		// Find Initial Location
+		// Find Pickup Location
 		reader.seek(0);
 		line = reader.readLine();
 		while (line != null) {
@@ -100,6 +101,24 @@ public class PDDLReaderUtil {
 						locations);
 				if ((cargo != null) && (location != null)) {
 					cargo.setPickupLocation(location);
+				}
+			}
+			line = reader.readLine();
+		}
+		// Find Delivery Location
+		reader.seek(0);
+		line = reader.readLine();
+		while (line != null) {
+			if (line.contains(GOAL_LOCATION_DELIMETER)) {
+				String data = line.substring(GOAL_LOCATION_DELIMETER.length());
+				String[] parts = data.split(" ");
+				String name = parts[0].trim();
+				String loc = parts[1].replace(')', ' ').trim();
+				Cargo cargo = CargoUtil.getCargoByName(name, cargos);
+				Location location = LocationUtil.getLocationByName(loc,
+						locations);
+				if ((cargo != null) && (location != null)) {
+					cargo.setDeliveryLocation(location);
 				}
 			}
 			line = reader.readLine();
@@ -292,23 +311,6 @@ public class PDDLReaderUtil {
 				for (String loc : locs) {
 					Location location = new Location(loc);
 					locations.add(location);
-				}
-			}
-			line = reader.readLine();
-		}
-		// Find Remaining Capacity For Locations
-		reader.seek(0);
-		line = reader.readLine();
-		while (line != null) {
-			if (line.contains(CAPACITY_DELIMETER)) {
-				String data = line.substring(CAPACITY_DELIMETER.length());
-				String[] parts = data.split("\\)");
-				String name = parts[0].trim();
-				String cap = parts[1].trim();
-				Location location = LocationUtil.getLocationByName(name,
-						locations);
-				if (location != null) {
-					location.setRemainingCapacity(Integer.parseInt(cap));
 				}
 			}
 			line = reader.readLine();

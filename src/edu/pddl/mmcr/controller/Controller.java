@@ -137,7 +137,7 @@ public class Controller {
 	}
 
 	public void setLocationRemainingCapacity(Location location, Integer capacity) {
-		if (capacity.equals(location.getRemainingCapacity())) {
+		if (!capacity.equals(location.getRemainingCapacity())) {
 			location.setRemainingCapacity(capacity);
 			ActionEvent event = new ActionEvent(location,
 					ActionEvent.ACTION_PERFORMED, Constants.OPERATION_UPDATE);

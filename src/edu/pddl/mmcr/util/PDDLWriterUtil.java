@@ -76,7 +76,7 @@ public class PDDLWriterUtil {
 				bw.close();
 				throw new PDDLModelIncompleteException("Cargo "
 						+ cargo.getName()
-						+ " does not have an initial location.");
+						+ " does not have a pickup location.");
 			}
 			bw.write("\t\t(at " + cargo.getName() + " "
 					+ cargo.getPickupLocation().getName() + ")");
@@ -155,7 +155,7 @@ public class PDDLWriterUtil {
 				bw.newLine();
 			}
 		}
-
+		//Cargo Available Times
 		for (Cargo cargo : cargos) {
 			// Cargo Available In Times
 			// If no timed availability omit TIL
@@ -178,7 +178,26 @@ public class PDDLWriterUtil {
 		}
 		bw.write("\t)");
 		bw.newLine();
-		bw.write("\t(:goal (and ))");
+		//Cargo Deliver Goals
+		bw.write("\t(:goal");
+		bw.newLine();
+		bw.write("\t\t(and");
+		bw.newLine();
+		for (Cargo cargo : cargos) {
+			if (cargo.getDeliveryLocation() == null) {
+				bw.close();
+				throw new PDDLModelIncompleteException("Cargo "
+						+ cargo.getName()
+						+ " does not have a delivery location.");
+			}
+			bw.write("\t\t\t(at " + cargo.getName() + " "
+					+ cargo.getDeliveryLocation().getName() + ")");
+			bw.newLine();
+		}
+
+		bw.write("\t\t)");
+		bw.newLine();
+		bw.write("\t)");
 		bw.newLine();
 		bw.write("\t(:metric minimize (total-cost))");
 		bw.newLine();

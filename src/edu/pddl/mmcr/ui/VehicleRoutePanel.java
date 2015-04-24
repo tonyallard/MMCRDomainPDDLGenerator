@@ -203,7 +203,8 @@ public class VehicleRoutePanel extends JPanel implements ActionListener,
 		if (e.getType() == TableModelEvent.UPDATE) {
 			int row = e.getFirstRow();
 			int col = e.getColumn();
-			if ((row < 0) || (col < 0)) {
+			if ((row < 0) || (col < 1)) { // account for first column being
+											// header too
 				return;
 			}
 			Object newObj = routeTableModel.getValueAt(row, col);
@@ -213,10 +214,11 @@ public class VehicleRoutePanel extends JPanel implements ActionListener,
 				String newValue = newObj.toString();
 				int travelTime = Integer.parseInt(newValue);
 				if (travelTime < 0) {
-					throw new RuntimeException("Vehicle route travel time cannot be negative.");
+					throw new RuntimeException(
+							"Vehicle route travel time cannot be negative.");
 				}
-				controller.setVehicleRoute(vehicle, origin,
-						destination, travelTime);
+				controller.setVehicleRoute(vehicle, origin, destination,
+						travelTime);
 				return;
 			}
 			controller.removeVehicleRoute(vehicle, origin, destination);
