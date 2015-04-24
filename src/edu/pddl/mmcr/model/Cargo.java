@@ -6,7 +6,8 @@ public class Cargo {
 
 	private String name = "";
 	private int size = 0;
-	private Location initialLocation = null;
+	private Location pickupLocation = null;
+	private Location deliveryLocation = null;
 	private int availableIn = 0;
 	private Integer requiredBy = null;
 
@@ -38,12 +39,20 @@ public class Cargo {
 		this.size = size;
 	}
 
-	public void setInitialLocation(Location loc) {
-		initialLocation = loc;
+	public void setPickupLocation(Location loc) {
+		pickupLocation = loc;
 	}
 
-	public Location getInitialLocation() {
-		return initialLocation;
+	public Location getPickupLocation() {
+		return pickupLocation;
+	}
+	
+	public Location getDeliveryLocation() {
+		return deliveryLocation;
+	}
+
+	public void setDeliveryLocation(Location deliveryLocation) {
+		this.deliveryLocation = deliveryLocation;
 	}
 
 	public int getAvailableIn() {

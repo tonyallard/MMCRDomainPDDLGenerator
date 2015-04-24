@@ -38,7 +38,8 @@ public class CargoInformationPanel extends JPanel implements ActionListener,
 	 * 
 	 */
 	private static final long serialVersionUID = 8878364677692218340L;
-	private static final int LOCATION_COLUMN_INDEX = 2;
+	private static final int PICKUP_LOCATION_COLUMN_INDEX = 2;
+	private static final int DELIVERY_LOCATION_COLUMN_INDEX = 3;
 
 	private Controller controller = null;
 
@@ -60,7 +61,7 @@ public class CargoInformationPanel extends JPanel implements ActionListener,
 
 	private void initCargoPanel() {
 
-		Object[] columnNames = { "Name", "Size", "Location", "Available At",
+		Object[] columnNames = { "Name", "Size", "Pickup Location", "Delivery Location", "Available At",
 				"Required By" };
 		cargoTableModel = new DefaultTableModel(columnNames, 0);
 		cargoTableModel.addTableModelListener(this);
@@ -110,7 +111,7 @@ public class CargoInformationPanel extends JPanel implements ActionListener,
 
 		for (int i = 0; i < columnNames.length; i++) {
 			TableColumn col = cargoTable.getColumnModel().getColumn(i);
-			if (i == LOCATION_COLUMN_INDEX) {
+			if ((i == PICKUP_LOCATION_COLUMN_INDEX) || (i == DELIVERY_LOCATION_COLUMN_INDEX)) {
 				JComboBox<Location> locCombo = new JComboBox<Location>(
 						comboBoxModel);
 				col.setCellEditor(new DefaultCellEditor(locCombo));
@@ -142,7 +143,8 @@ public class CargoInformationPanel extends JPanel implements ActionListener,
 		Vector<Object> rowData = new Vector<Object>();
 		rowData.add(cargo.getName());
 		rowData.add(cargo.getSize());
-		rowData.add(cargo.getInitialLocation());
+		rowData.add(cargo.getPickupLocation());
+		rowData.add(cargo.getDeliveryLocation());
 		rowData.add(cargo.getAvailableIn());
 		rowData.add(cargo.getRequiredBy());
 		cargoToRowMap.put(cargo, cargoTableModel.getRowCount());
@@ -175,9 +177,10 @@ public class CargoInformationPanel extends JPanel implements ActionListener,
 					.getDataVector().get(row);
 			rowData.setElementAt(cargo.getName(), 0);
 			rowData.setElementAt(cargo.getSize(), 1);
-			rowData.setElementAt(cargo.getInitialLocation(), 2);
-			rowData.setElementAt(cargo.getAvailableIn(), 3);
-			rowData.setElementAt(cargo.getRequiredBy(), 4);
+			rowData.setElementAt(cargo.getPickupLocation(), 2);
+			rowData.setElementAt(cargo.getDeliveryLocation(), 3);
+			rowData.setElementAt(cargo.getAvailableIn(), 4);
+			rowData.setElementAt(cargo.getRequiredBy(), 5);
 		}
 	}
 
@@ -258,7 +261,7 @@ public class CargoInformationPanel extends JPanel implements ActionListener,
 					if (newValue.length() > 0) {
 						Location location = controller.getLocationByName(newValue);
 						if (location != null) {
-							controller.setCargoInitialLocation(cargo, location);
+							controller.setCargoPickupLocation(cargo, location);
 							break;
 						}
 					}
@@ -266,6 +269,19 @@ public class CargoInformationPanel extends JPanel implements ActionListener,
 				// If you get here there probably aren't any locations defined
 				break;
 			case 3:
+				if (newObj != null) {
+					String newValue = newObj.toString();
+					if (newValue.length() > 0) {
+						Location location = controller.getLocationByName(newValue);
+						if (location != null) {
+							controller.setCargoDeliveryLocation(cargo, location);
+							break;
+						}
+					}
+				}
+				// If you get here there probably aren't any locations defined
+				break;
+			case 4:
 				// Cargo available in
 				if (newObj != null) {
 					String newValue = newObj.toString();
@@ -279,7 +295,7 @@ public class CargoInformationPanel extends JPanel implements ActionListener,
 					}
 				}
 				throw new RuntimeException("Cargo available in cannot be null.");	
-			case 4:
+			case 5:
 				// Cargo required by
 				if (newObj != null) {
 					String newValue = newObj.toString();

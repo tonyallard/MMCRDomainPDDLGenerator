@@ -10,6 +10,7 @@ import javax.swing.DefaultCellEditor;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
+import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
@@ -128,12 +129,14 @@ public class VehicleInformationPanel extends JPanel implements
 	}
 
 	private void initOtherVehiclePanels() {
-		JPanel centerPanel = new JPanel(new BorderLayout());
 		this.vehicleRoutePanel = new VehicleRoutePanel(vehicle, controller);
 		this.vehicleLoadUnloadPanel = new VehicleLoadUnloadPanel(vehicle, controller);
-		centerPanel.add(vehicleRoutePanel, BorderLayout.CENTER);
-		centerPanel.add(vehicleLoadUnloadPanel, BorderLayout.EAST);
-		add(centerPanel, BorderLayout.CENTER);
+		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
+				true, vehicleRoutePanel, vehicleLoadUnloadPanel);
+
+		splitPane.setOneTouchExpandable(true);
+		splitPane.setDividerLocation(750);//one third
+		add(splitPane, BorderLayout.CENTER);
 	}
 
 	private void updateVehicle(Vehicle vehicle) {

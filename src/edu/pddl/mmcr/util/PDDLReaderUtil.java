@@ -99,7 +99,7 @@ public class PDDLReaderUtil {
 				Location location = LocationUtil.getLocationByName(loc,
 						locations);
 				if ((cargo != null) && (location != null)) {
-					cargo.setInitialLocation(location);
+					cargo.setPickupLocation(location);
 				}
 			}
 			line = reader.readLine();

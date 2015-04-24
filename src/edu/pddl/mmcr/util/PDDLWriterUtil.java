@@ -72,14 +72,14 @@ public class PDDLWriterUtil {
 		}
 		// Initial cargo locations
 		for (Cargo cargo : cargos) {
-			if (cargo.getInitialLocation() == null) {
+			if (cargo.getPickupLocation() == null) {
 				bw.close();
 				throw new PDDLModelIncompleteException("Cargo "
 						+ cargo.getName()
 						+ " does not have an initial location.");
 			}
 			bw.write("\t\t(at " + cargo.getName() + " "
-					+ cargo.getInitialLocation().getName() + ")");
+					+ cargo.getPickupLocation().getName() + ")");
 			bw.newLine();
 		}
 		// Vehicle Ready for Loading

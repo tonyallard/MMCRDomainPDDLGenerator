@@ -2,7 +2,6 @@ package edu.pddl.mmcr.ui;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
-import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
@@ -22,6 +21,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JSplitPane;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
@@ -136,10 +136,13 @@ public class MainGUI extends JFrame implements ActionListener, FocusListener {
 		CargoInformationPanel cPanel = new CargoInformationPanel(controller);
 		LocationInformationPanel lPanel = new LocationInformationPanel(
 				controller);
-		JPanel eastPanel = new JPanel(new GridLayout(1, 2));
-		eastPanel.add(cPanel);
-		eastPanel.add(lPanel);
-		add(eastPanel, BorderLayout.SOUTH);
+
+		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
+				true, cPanel, lPanel);
+		splitPane.setOneTouchExpandable(true);
+		int dividerLocation = (int) (this.getWidth() * 0.75); //last third
+		splitPane.setDividerLocation(dividerLocation);
+		add(splitPane, BorderLayout.SOUTH);
 	}
 
 	private void initMainPanel() {
@@ -158,14 +161,16 @@ public class MainGUI extends JFrame implements ActionListener, FocusListener {
 		if (returnValue == JFileChooser.APPROVE_OPTION) {
 			File selectedFile = fileChooser.getSelectedFile();
 			if (selectedFile.exists()) {
-				int option = JOptionPane.showConfirmDialog(this, "Are you sure you would like to overwrite "
-						+ selectedFile.getName(), "File Exists!",
-						JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+				int option = JOptionPane
+						.showConfirmDialog(this,
+								"Are you sure you would like to overwrite "
+										+ selectedFile.getName(),
+								"File Exists!", JOptionPane.YES_NO_OPTION,
+								JOptionPane.QUESTION_MESSAGE);
 				if (option == JOptionPane.NO_OPTION) {
 					return;
 				}
-			}
-			else if (selectedFile.getName().lastIndexOf('.') == -1) {
+			} else if (selectedFile.getName().lastIndexOf('.') == -1) {
 				selectedFile = new File(selectedFile + ".pddl");
 			}
 			try {

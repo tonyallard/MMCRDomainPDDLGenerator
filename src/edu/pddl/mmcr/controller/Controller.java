@@ -112,8 +112,8 @@ public class Controller {
 			vehicle.removeRouteWithLocation(location);
 		}
 		for (Cargo cargo : model.getCargos()) {
-			if (cargo.getInitialLocation() == location) {
-				cargo.setInitialLocation(null);
+			if (cargo.getPickupLocation() == location) {
+				cargo.setPickupLocation(null);
 				ActionEvent event = new ActionEvent(cargo,
 						ActionEvent.ACTION_PERFORMED,
 						Constants.OPERATION_UPDATE);
@@ -300,9 +300,19 @@ public class Controller {
 		}
 	}
 
-	public void setCargoInitialLocation(Cargo cargo, Location location) {
-		if (!location.equals(cargo.getInitialLocation())) {
-			cargo.setInitialLocation(location);
+	public void setCargoPickupLocation(Cargo cargo, Location location) {
+		if (!location.equals(cargo.getPickupLocation())) {
+			cargo.setPickupLocation(location);
+			ActionEvent event = new ActionEvent(cargo,
+					ActionEvent.ACTION_PERFORMED, Constants.OPERATION_UPDATE);
+			notifyListeners(event);
+			fileChangedFlag = true;
+		}
+	}
+
+	public void setCargoDeliveryLocation(Cargo cargo, Location location) {
+		if (!location.equals(cargo.getDeliveryLocation())) {
+			cargo.setDeliveryLocation(location);
 			ActionEvent event = new ActionEvent(cargo,
 					ActionEvent.ACTION_PERFORMED, Constants.OPERATION_UPDATE);
 			notifyListeners(event);
