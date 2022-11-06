@@ -30,10 +30,10 @@ public class PDDLReaderUtil {
 	private static final String ROUTES_DELIMETER = "\t\t(= (travel-time ";
 	private static final String LOAD_DELIMETER = "\t\t(= (load-time ";
 	private static final String UNLOAD_DELIMETER = "\t\t(= (unload-time ";
-	private static final String AVAILABLE_DELIMETER = ".+\\(at \\d+ \\(available.+\\)\\)";
-	private static final String REQUIRED_BY_DELIMETER = ".*\\(at \\d+ \\(not \\(available.+\\)\\)\\)";
+	private static final String AVAILABLE_DELIMETER = ".*\\(at \\d+ \\(available.+\\)\\)";
+	private static final String REQUIRED_BY_DELIMETER = ".*\\(at \\d+.\\d* \\(not \\(available.+\\)\\)\\)";
 	private static final String SIZE_DELIMETER = "\t\t(= (size ";
-	private static final String GOAL_LOCATION_DELIMETER = "\t\t\t(at ";
+	private static final String GOAL_LOCATION_DELIMETER = "\t\t(at ";
 
 	public static PDDLProblem readProblem(File file) throws IOException {
 		PDDLProblem model = new PDDLProblem();
@@ -133,7 +133,7 @@ public class PDDLReaderUtil {
 				String available = parts[1].trim();
 				Cargo cargo = CargoUtil.getCargoByName(name, cargos);
 				if (cargo != null) {
-					cargo.setAvailableIn(Integer.parseInt(available));
+					cargo.setAvailableIn(Double.parseDouble(available));
 				}
 			}
 			line = reader.readLine();
@@ -148,7 +148,7 @@ public class PDDLReaderUtil {
 				String available = parts[1].trim();
 				Cargo cargo = CargoUtil.getCargoByName(name, cargos);
 				if (cargo != null) {
-					cargo.setRequiredBy(Integer.parseInt(available));
+					cargo.setRequiredBy(Double.parseDouble(available));
 				}
 			}
 			line = reader.readLine();

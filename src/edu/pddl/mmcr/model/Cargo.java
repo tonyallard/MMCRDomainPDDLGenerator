@@ -8,8 +8,8 @@ public class Cargo {
 	private int size = 0;
 	private Location pickupLocation = null;
 	private Location deliveryLocation = null;
-	private int availableIn = 0;
-	private Integer requiredBy = null;
+	private double availableIn = 0;
+	private Double requiredBy = null;
 
 	public Cargo(String name, int size, int availableIn) {
 		super();
@@ -55,19 +55,19 @@ public class Cargo {
 		this.deliveryLocation = deliveryLocation;
 	}
 
-	public int getAvailableIn() {
+	public double getAvailableIn() {
 		return availableIn;
 	}
 
-	public void setAvailableIn(int availableIn) {
+	public void setAvailableIn(double availableIn) {
 		this.availableIn = availableIn;
 	}
 
-	public Integer getRequiredBy() {
+	public Double getRequiredBy() {
 		return requiredBy;
 	}
 
-	public void setRequiredBy(Integer requiredBy) {
+	public void setRequiredBy(Double requiredBy) {
 		this.requiredBy = requiredBy;
 	}
 }

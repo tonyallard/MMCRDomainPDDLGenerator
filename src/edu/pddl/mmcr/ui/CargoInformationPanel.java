@@ -286,7 +286,7 @@ public class CargoInformationPanel extends JPanel implements ActionListener,
 				if (newObj != null) {
 					String newValue = newObj.toString();
 					if (newValue.length() > 0) {
-						int availableIn = Integer.parseInt(newValue);
+						double availableIn = Double.parseDouble(newValue);
 						if (availableIn < 0) {
 							throw new RuntimeException("Cargo available in cannot be negative.");
 						}
@@ -300,7 +300,7 @@ public class CargoInformationPanel extends JPanel implements ActionListener,
 				if (newObj != null) {
 					String newValue = newObj.toString();
 					if (newValue.length() > 0) {
-						int requiredBy = Integer.parseInt(newValue);
+						double requiredBy = Double.parseDouble(newValue);
 						if (requiredBy < 0) {
 							throw new RuntimeException("Cargo required by cannot be negative.");
 						}

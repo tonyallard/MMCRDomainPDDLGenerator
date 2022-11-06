@@ -330,7 +330,7 @@ public class Controller {
 		}
 	}
 
-	public void setCargoAvailableIn(Cargo cargo, Integer availableIn) {
+	public void setCargoAvailableIn(Cargo cargo, Double availableIn) {
 		if (!availableIn.equals(cargo.getAvailableIn())) {
 			cargo.setAvailableIn(availableIn);
 			ActionEvent event = new ActionEvent(cargo,
@@ -340,7 +340,7 @@ public class Controller {
 		}
 	}
 
-	public void setCargoRequiredBy(Cargo cargo, Integer requiredBy) {
+	public void setCargoRequiredBy(Cargo cargo, Double requiredBy) {
 		if (!requiredBy.equals(cargo.getRequiredBy())) {
 			cargo.setRequiredBy(requiredBy);
 			ActionEvent event = new ActionEvent(cargo,

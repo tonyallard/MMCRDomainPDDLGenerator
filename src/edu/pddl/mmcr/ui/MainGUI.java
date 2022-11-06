@@ -1,5 +1,6 @@
 package edu.pddl.mmcr.ui;
 
+import java.awt.Dimension;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
@@ -136,7 +137,8 @@ public class MainGUI extends JFrame implements ActionListener, FocusListener {
 		CargoInformationPanel cPanel = new CargoInformationPanel(controller);
 		LocationInformationPanel lPanel = new LocationInformationPanel(
 				controller);
-
+		cPanel.setPreferredSize(new Dimension(100, 300));
+		lPanel.setPreferredSize(new Dimension(100, 300));
 		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
 				true, cPanel, lPanel);
 		splitPane.setOneTouchExpandable(true);
@@ -288,9 +290,9 @@ public class MainGUI extends JFrame implements ActionListener, FocusListener {
 						"Problem name cannot be empty",
 						"Problem Definition Error", JOptionPane.ERROR_MESSAGE);
 				problemNameField.setText(controller.getProblemName());
-			} else if (Pattern.compile("[^a-zA-Z0-9]").matcher(newProb).find()) {
+			} else if (Pattern.compile("[^a-zA-Z0-9_-]").matcher(newProb).find()) {
 				JOptionPane.showMessageDialog(this,
-						"Problem name must be alphanumeric only",
+						"Problem name contains invalid characters",
 						"Problem Definition Error", JOptionPane.ERROR_MESSAGE);
 				problemNameField.setText(controller.getProblemName());
 			} else {
