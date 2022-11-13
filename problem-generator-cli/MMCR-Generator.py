@@ -114,8 +114,8 @@ def main(args):
 	min_cargo = config["cargo"]["min"]
 	max_cargo = config["cargo"]["max"]
 	max_tightness = config["max-tightness"]
-	max_dilation_itrs = config["num-dilations"]["max"]
-	min_dilation_itrs = config["num-dilations"]["min"]
+	max_dilation_itrs = config["dilations"]["max"]
+	min_dilation_itrs = config["dilations"]["min"]
 	
 	#Create 4 Sectors, three locations per sector
 	sectors, locations, connectivityMap, initPDDL = MMCRProbGen.createSectors(cities, locations_per_city)

@@ -9,7 +9,7 @@
 	},
 	"num-setups" : 30,
 	"max-tightness" : 2,
-	"num-dilations" : {
+	"dilations" : {
 		"min" : 0,
 		"max" : 4
 	},	
