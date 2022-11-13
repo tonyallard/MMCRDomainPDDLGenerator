@@ -110,12 +110,12 @@ def main(args):
 	locations_per_city = config["locations-per-city"]
 	vehicles_per_city = config["vehicles-per-city"]
 	
-	num_simulations = config["num-simulations"]
+	num_setups = config["num-setups"]
 	min_cargo = config["cargo"]["min"]
 	max_cargo = config["cargo"]["max"]
 	max_tightness = config["max-tightness"]
-	max_dilation = config["dilation"]["max"]
-	min_dilation = config["dilation"]["min"]
+	max_dilation_itrs = config["num-dilations"]["max"]
+	min_dilation_itrs = config["num-dilations"]["min"]
 	
 	#Create 4 Sectors, three locations per sector
 	sectors, locations, connectivityMap, initPDDL = MMCRProbGen.createSectors(cities, locations_per_city)
@@ -146,7 +146,7 @@ def main(args):
 		cargoes, pddl2 = MMCRProbGen.createCargo(numCargo, deafult_cargo_size)
 		pddl += pddl2
 	
-		for p in range(0, num_simulations):
+		for p in range(0, num_setups):
 
 			pddl2 = []
 			pddl2 += pddl
@@ -159,7 +159,7 @@ def main(args):
 			goals, deliveryInfo, pddl3 = MMCRProbGen.getRandomCargoLocations(cargoes, locations)
 			pddl2 += pddl3
 
-			for seq in range(min_dilation, max_dilation + 1):
+			for seq in range(min_dilation_itrs, max_dilation_itrs + 1):
 
 				probNum += 1
 				
